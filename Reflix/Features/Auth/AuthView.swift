@@ -196,3 +196,95 @@ private struct OTPCodeField: View {
             )
     }
 }
+
+/// 登录页背景：缓慢漂移的热门海报墙 + 暗化/品牌叠层。
+private struct AuthPosterBackdrop: View {
+    @State private var posters: [String] = []
+
+    var body: some View {
+        ZStack {
+            fallbackGradient
+            if !posters.isEmpty {
+                wall
+                    .transition(.opacity)
+            }
+            Color.black.opacity(0.55).ignoresSafeArea()
+            LinearGradient(colors: [.clear, .black.opacity(0.5), .black],
+                           startPoint: .center, endPoint: .bottom)
+                .ignoresSafeArea()
+            RadialGradient(colors: [RFX.accent.opacity(0.35), .clear],
+                           center: .top, startRadius: 0, endRadius: 320)
+                .ignoresSafeArea()
+                .blendMode(.screen)
+        }
+        .animation(.easeOut(duration: 0.6), value: posters.isEmpty)
+        .ignoresSafeArea()
+        .task { await load() }
+    }
+
+    private var fallbackGradient: some View {
+        LinearGradient(colors: [Color(hex: 0x2a1206), Color(hex: 0x140a06), .black],
+                       startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea()
+    }
+
+    private var wall: some View {
+        let columns = split(posters, into: 3)
+        return HStack(spacing: 10) {
+            ForEach(Array(columns.enumerated()), id: \.offset) { index, paths in
+                PosterColumn(paths: paths, reversed: index % 2 == 1)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal, -16)
+        .blur(radius: 2)
+        .opacity(0.9)
+        .ignoresSafeArea()
+    }
+
+    private func split(_ items: [String], into n: Int) -> [[String]] {
+        var result = Array(repeating: [String](), count: n)
+        for (i, item) in items.enumerated() { result[i % n].append(item) }
+        return result
+    }
+
+    private func load() async {
+        async let movies = try? TMDBService.shared.trending(.movie)
+        async let tv = try? TMDBService.shared.trending(.tv)
+        let combined = ((await movies) ?? []) + ((await tv) ?? [])
+        var seen = Set<String>()
+        let unique = combined.compactMap(\.posterPath).filter { seen.insert($0).inserted }
+        posters = Array(unique.prefix(15))
+    }
+}
+
+/// 单列纵向无缝滚动海报（内容复制 3 份保证窗口始终被填满）。
+private struct PosterColumn: View {
+    let paths: [String]
+    let reversed: Bool
+
+    @State private var offset: CGFloat = 0
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let itemH = w * 1.5                       // 2:3 海报
+            let loop = itemH * CGFloat(max(paths.count, 1))
+            VStack(spacing: 0) {
+                ForEach(0..<(paths.count * 3), id: \.self) { i in
+                    RemoteImage(path: paths[i % paths.count], size: .w342, seed: "auth-\(reversed)-\(i)")
+                        .frame(width: w, height: itemH)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
+            }
+            .frame(width: w, alignment: .top)
+            .offset(y: offset - (reversed ? loop : 0))
+            .onAppear {
+                offset = reversed ? loop : 0
+                withAnimation(.linear(duration: 45).repeatForever(autoreverses: false)) {
+                    offset = reversed ? 0 : -loop
+                }
+            }
+        }
+    }
+}
