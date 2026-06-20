@@ -22,6 +22,8 @@ final class PlexAuth: NSObject, ASWebAuthenticationPresentationContextProviding 
 
     private let session = URLSession(configuration: .default)
     private var webSession: ASWebAuthenticationSession?
+    /// Set once the web auth browser closes (forwardUrl callback or user dismiss).
+    private var webSessionClosed = false
 
     /// Headers identifying this client to plex.tv.
     nonisolated static func headers(token: String? = nil) -> [String: String] {
@@ -41,11 +43,15 @@ final class PlexAuth: NSObject, ASWebAuthenticationPresentationContextProviding 
     /// Runs the full login flow and returns a stored credential.
     func login() async throws -> PlexCredential {
         let pin = try await createPin()
-        let authURL = buildAuthURL(code: pin.code)
 
-        // Present the web auth session. It resolves on the forwardUrl callback
-        // OR when the user dismisses it — either way we then poll for the token.
-        await presentWebSession(url: authURL)
+        // Present the browser AND poll concurrently. Plex's web auth does not
+        // reliably redirect to a custom-scheme forwardUrl, so we never depend on
+        // the ASWebAuthenticationSession callback to finish the flow. Polling is
+        // the source of truth: the instant the PIN is linked we have the token
+        // and dismiss the browser ourselves — the user returns to the app
+        // automatically without waiting on a redirect that may never come.
+        startWebSession(url: buildAuthURL(code: pin.code))
+        defer { cancelWebSession() }
 
         let token = try await pollForToken(pinID: pin.id, code: pin.code)
         let account = (try? await fetchAccount(token: token))
@@ -80,27 +86,35 @@ final class PlexAuth: NSObject, ASWebAuthenticationPresentationContextProviding 
         return URL(string: AppConfig.plexAuthAppURL + "#?" + query)!
     }
 
-    private func presentWebSession(url: URL) async {
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            let webSession = ASWebAuthenticationSession(
-                url: url,
-                callbackURLScheme: AppConfig.plexCallbackScheme
-            ) { _, _ in
-                continuation.resume()
-            }
-            webSession.presentationContextProvider = self
-            webSession.prefersEphemeralWebBrowserSession = false
-            self.webSession = webSession
-            if !webSession.start() {
-                continuation.resume()
-            }
+    /// Presents the web auth browser without blocking. The completion handler
+    /// only flips `webSessionClosed` — the poll loop drives the actual flow.
+    private func startWebSession(url: URL) {
+        webSessionClosed = false
+        let webSession = ASWebAuthenticationSession(
+            url: url,
+            callbackURLScheme: AppConfig.plexCallbackScheme
+        ) { [weak self] _, _ in
+            Task { @MainActor in self?.webSessionClosed = true }
         }
-        self.webSession = nil
+        webSession.presentationContextProvider = self
+        webSession.prefersEphemeralWebBrowserSession = false
+        self.webSession = webSession
+        if !webSession.start() {
+            webSessionClosed = true
+        }
+    }
+
+    /// Dismisses the browser if it's still open (e.g. once we have the token).
+    private func cancelWebSession() {
+        webSession?.cancel()
+        webSession = nil
     }
 
     private func pollForToken(pinID: Int, code: String) async throws -> String {
         let url = URL(string: "\(AppConfig.plexPinsURL)/\(pinID)?code=\(code)")!
-        for _ in 0..<20 {
+        // PIN lives 30 min; poll ~3 min so slow logins (2FA etc.) still complete.
+        var graceRemaining = 5
+        for _ in 0..<180 {
             var req = URLRequest(url: url)
             Self.headers().forEach { req.setValue($1, forHTTPHeaderField: $0) }
             if let (data, _) = try? await session.data(for: req),
@@ -108,9 +122,16 @@ final class PlexAuth: NSObject, ASWebAuthenticationPresentationContextProviding 
                let token = pin.authToken, !token.isEmpty {
                 return token
             }
+            // The user closed the browser without a token landing yet. Plex may
+            // have linked the PIN a beat before dismissal, so keep polling for a
+            // few more seconds; if nothing arrives, treat it as a cancellation.
+            if webSessionClosed {
+                graceRemaining -= 1
+                if graceRemaining <= 0 { throw PlexAuthError.cancelled }
+            }
             try? await Task.sleep(nanoseconds: 1_000_000_000)
         }
-        throw PlexAuthError.cancelled
+        throw PlexAuthError.timedOut
     }
 
     private func fetchAccount(token: String) async throws -> PlexAccount {

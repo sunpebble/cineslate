@@ -3,6 +3,7 @@ import SwiftUI
 struct DiscoverView: View {
     @EnvironmentObject private var router: Router
     @StateObject private var model = DiscoverViewModel()
+    @State private var heroID: Int?
 
     var body: some View {
         ScrollView {
@@ -70,20 +71,29 @@ struct DiscoverView: View {
             .scrollTargetLayout()
         }
         .scrollTargetBehavior(.viewAligned)
+        .scrollPosition(id: $heroID)
         .rfxScroll()
     }
 
+    private var currentHeroIndex: Int {
+        guard let heroID,
+              let idx = model.heroes.firstIndex(where: { $0.id == heroID }) else { return 0 }
+        return idx
+    }
+
     private var pageDots: some View {
-        HStack(spacing: 7) {
-            ForEach(0..<5, id: \.self) { i in
+        let count = model.heroes.isEmpty ? 5 : model.heroes.count
+        return HStack(spacing: 7) {
+            ForEach(0..<count, id: \.self) { i in
                 Capsule()
-                    .fill(i == 0 ? Color.white : Color.white.opacity(0.3))
-                    .frame(width: i == 0 ? 18 : 5, height: 5)
+                    .fill(i == currentHeroIndex ? Color.white : Color.white.opacity(0.3))
+                    .frame(width: i == currentHeroIndex ? 18 : 5, height: 5)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 4)
         .padding(.bottom, 26)
+        .animation(.snappy, value: currentHeroIndex)
     }
 
     // MARK: Ranked TV
