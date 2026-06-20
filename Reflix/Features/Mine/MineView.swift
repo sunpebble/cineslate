@@ -13,7 +13,6 @@ struct MineView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 titleRow
-                proBanner
                 featured
                 segmentPills
                 rows
@@ -51,23 +50,6 @@ struct MineView: View {
         .padding(.horizontal, 22)
         .padding(.top, 8)
         .padding(.bottom, 16)
-    }
-
-    private var proBanner: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("🎉 升级到 Pro").font(.system(size: 17, weight: .heavy)).foregroundStyle(.white)
-            Text("限时优惠，解锁超多精彩功能").font(.system(size: 14)).foregroundStyle(RFX.purple)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 18)
-        .padding(.vertical, 16)
-        .background(
-            LinearGradient(colors: [Color(hex: 0x26262a), Color(hex: 0x1b1b1f)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing),
-            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-        )
-        .padding(.horizontal, 22)
-        .padding(.bottom, 18)
     }
 
     // MARK: Featured

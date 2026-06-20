@@ -75,7 +75,7 @@ struct SettingsView: View {
                     .overlay(Text(initials).font(.system(size: 18, weight: .bold)).foregroundStyle(RFX.accent))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(auth.email).font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
-                    Text("免费会员").font(.system(size: 13)).foregroundStyle(RFX.text3)
+                    Text("已登录").font(.system(size: 13)).foregroundStyle(RFX.text3)
                 }
                 Spacer()
             }
