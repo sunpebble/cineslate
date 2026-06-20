@@ -10,6 +10,7 @@ final class DiscoverViewModel: ObservableObject {
     @Published var loadError: String?
 
     private var hasLoaded = false
+    private static let cacheKey = "discover"
 
     /// Genre browse cards (fixed set, matching the source design).
     let genres: [GenreCard] = [
@@ -27,11 +28,23 @@ final class DiscoverViewModel: ObservableObject {
         StudioCard(name: "HBO", networkId: 49, colors: [0x3a2a4a, 0x180e28]),
     ]
 
+    /// Cache-first: render the last persisted snapshot immediately, then
+    /// revalidate in the background only if it is older than the soft TTL.
     func loadIfNeeded() async {
         guard !hasLoaded else { return }
-        await reload()
+        if let entry = await DiskCache.shared.load(Self.cacheKey, as: DiscoverSnapshot.self) {
+            apply(entry.payload)
+            hasLoaded = true
+            if !entry.isFresh(ttl: CacheTTL.discover) {
+                await reload()
+            }
+        } else {
+            await reload()
+        }
     }
 
+    /// Force a network refresh (pull-to-refresh + stale revalidation) and persist
+    /// the snapshot. On failure the existing (cached) content is kept.
     func reload() async {
         isLoading = true
         loadError = nil
@@ -51,11 +64,31 @@ final class DiscoverViewModel: ObservableObject {
             trendingTV = Array(popular.prefix(8))
             people = Array(persons.prefix(10))
             hasLoaded = true
+            await DiskCache.shared.save(Self.cacheKey, snapshot())
         } catch {
             loadError = (error as? LocalizedError)?.errorDescription ?? "加载失败，请检查网络或 API Key"
         }
         isLoading = false
     }
+
+    private func snapshot() -> DiscoverSnapshot {
+        DiscoverSnapshot(heroes: heroes, rankedTV: rankedTV, trendingTV: trendingTV, people: people)
+    }
+
+    private func apply(_ snapshot: DiscoverSnapshot) {
+        heroes = snapshot.heroes
+        rankedTV = snapshot.rankedTV
+        trendingTV = snapshot.trendingTV
+        people = snapshot.people
+    }
+}
+
+/// Persisted snapshot of the discover feed, for instant / offline render.
+struct DiscoverSnapshot: Codable {
+    var heroes: [TMDBMedia]
+    var rankedTV: [TMDBMedia]
+    var trendingTV: [TMDBMedia]
+    var people: [TMDBMedia]
 }
 
 struct GenreCard: Identifiable, Hashable {

@@ -10,12 +10,12 @@ struct MediaRef: Hashable, Identifiable {
     let type: MediaType
 }
 
-struct TMDBPagedResponse<T: Decodable>: Decodable {
+struct TMDBPagedResponse<T: Codable>: Codable {
     let results: [T]
 }
 
 /// One media row from trending / search / discover endpoints.
-struct TMDBMedia: Decodable, Identifiable, Hashable {
+struct TMDBMedia: Codable, Identifiable, Hashable {
     let id: Int
     let title: String?
     let name: String?
@@ -30,6 +30,8 @@ struct TMDBMedia: Decodable, Identifiable, Hashable {
     let genreIds: [Int]?
 
     /// Filled in from the calling endpoint when TMDB omits `media_type`.
+    /// Not in `CodingKeys`, so it is neither decoded from TMDB nor persisted to
+    /// the cache — `resolvedType`'s inference covers every cached endpoint.
     var forcedType: MediaType?
 
     enum CodingKeys: String, CodingKey {
@@ -65,12 +67,12 @@ struct TMDBMedia: Decodable, Identifiable, Hashable {
 
 // MARK: - Detail
 
-struct TMDBGenre: Decodable, Hashable, Identifiable {
+struct TMDBGenre: Codable, Hashable, Identifiable {
     let id: Int
     let name: String
 }
 
-struct TMDBCastMember: Decodable, Identifiable, Hashable {
+struct TMDBCastMember: Codable, Identifiable, Hashable {
     let id: Int
     let name: String
     let character: String?
@@ -82,20 +84,20 @@ struct TMDBCastMember: Decodable, Identifiable, Hashable {
     }
 }
 
-struct TMDBCredits: Decodable, Hashable {
+struct TMDBCredits: Codable, Hashable {
     let cast: [TMDBCastMember]
 }
 
-struct TMDBImage: Decodable, Hashable {
+struct TMDBImage: Codable, Hashable {
     let filePath: String
     enum CodingKeys: String, CodingKey { case filePath = "file_path" }
 }
 
-struct TMDBImages: Decodable, Hashable {
+struct TMDBImages: Codable, Hashable {
     let backdrops: [TMDBImage]
 }
 
-struct TMDBDetail: Decodable, Identifiable {
+struct TMDBDetail: Codable, Identifiable {
     let id: Int
     let title: String?
     let name: String?

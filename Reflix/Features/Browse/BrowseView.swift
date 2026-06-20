@@ -34,7 +34,7 @@ struct BrowseView: View {
             .padding(.top, 8)
             .padding(.bottom, 40)
 
-            if isLoading {
+            if isLoading && items.isEmpty {
                 ProgressView().tint(.white).padding(.top, 40)
             }
         }
@@ -54,18 +54,40 @@ struct BrowseView: View {
         .task { await load() }
     }
 
+    /// Cache-first: render the cached grid immediately, then revalidate from the
+    /// network only when older than the soft TTL. Cached items survive failures.
     private func load() async {
-        isLoading = true
+        let key = "browse-\(target.cacheID)"
+        if let entry = await DiskCache.shared.load(key, as: [TMDBMedia].self) {
+            items = entry.payload
+            isLoading = false
+            if entry.isFresh(ttl: CacheTTL.browse) { return }
+        } else {
+            isLoading = true
+        }
         do {
+            let fresh: [TMDBMedia]
             switch target {
             case .genre(let g):
-                items = try await TMDBService.shared.discover(type: .movie, genre: g.genreId)
+                fresh = try await TMDBService.shared.discover(type: .movie, genre: g.genreId)
             case .studio(let s):
-                items = try await TMDBService.shared.discover(type: .tv, network: s.networkId)
+                fresh = try await TMDBService.shared.discover(type: .tv, network: s.networkId)
             }
+            items = fresh
+            await DiskCache.shared.save(key, fresh)
         } catch {
-            items = []
+            // Keep cached items (if any) on failure.
         }
         isLoading = false
+    }
+}
+
+extension BrowseTarget {
+    /// Stable cache key fragment per browse destination.
+    var cacheID: String {
+        switch self {
+        case .genre(let g): return "genre-\(g.genreId)"
+        case .studio(let s): return "studio-\(s.networkId)"
+        }
     }
 }

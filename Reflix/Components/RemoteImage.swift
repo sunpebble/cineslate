@@ -1,7 +1,10 @@
 import SwiftUI
 
-/// AsyncImage with a deterministic gradient placeholder + crossfade, matching
-/// the source design's gradient-while-loading behaviour.
+/// A cached image with a deterministic gradient placeholder + crossfade,
+/// matching the source design's gradient-while-loading behaviour.
+///
+/// Backed by `ImageStore` (memory + disk) via `CachedAsyncImage`, so posters
+/// and backdrops survive relaunch and render offline.
 ///
 /// The image is rendered as an overlay on a size-neutral `Color.clear` base so
 /// it fills whatever frame the call site gives it (e.g. `.frame(height: 640)`)
@@ -22,18 +25,8 @@ struct RemoteImage: View {
         let gradient = PlaceholderGradient.make(seed: PlaceholderGradient.seed(for: seed))
         Color.clear
             .overlay {
-                AsyncImage(
-                    url: tmdbImageURL(path, size),
-                    transaction: .init(animation: .easeOut(duration: 0.35))
-                ) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    case .empty, .failure:
-                        gradient
-                    @unknown default:
-                        gradient
-                    }
+                CachedAsyncImage(url: tmdbImageURL(path, size)) {
+                    gradient
                 }
             }
             .clipped()

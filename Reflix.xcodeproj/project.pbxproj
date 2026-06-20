@@ -8,18 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		030A85FCBFAB0E22AFC1D02A /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92C75523A6ED36922341B3A /* AuthView.swift */; };
+		05239F310EF7AB38D9514EE7 /* ImageStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44EE9DDD3E41F652D6584730 /* ImageStoreTests.swift */; };
 		0C7457745A1923ADF82E99DD /* MediaCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A7E879AA7659BCA1EF2196 /* MediaCards.swift */; };
 		16F2ECD2C6F1D6635A1D0906 /* KeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D1470B374849FC7BB597727 /* KeyStore.swift */; };
+		2628F6A94CE0217967A8998F /* ImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8832E891C3D673BE79C6D /* ImageStore.swift */; };
 		2807043C75CC1F8546428169 /* ReflixApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9965446F5B5A33FD1A273E7C /* ReflixApp.swift */; };
 		36099AD0CC0FFC7A3FEE4E5E /* TMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74D2A3407F04E3C505BFD4C /* TMDBService.swift */; };
 		42015DB17A34CD420172DB84 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727320D51ABEB430B76B7AF /* SettingsView.swift */; };
 		448811A7C69D17E1EDE569AE /* MineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7AE6DEA9CD0E1A6F1A964E /* MineView.swift */; };
 		49908B5E3A61433DCF6BD9C9 /* MineViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F9CAEA593FABE00279DF52 /* MineViewModel.swift */; };
+		4D11091119F7B832C28BCFD7 /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2863F55F41EF4326C742088 /* CachedAsyncImage.swift */; };
 		5CB7CC80F67C65866564CD5B /* PlexService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F1B680CA26187D4EB91A9F /* PlexService.swift */; };
 		607D8D038E39C003EA7E6219 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28583EBB9D7A322997C39811 /* Common.swift */; };
 		65B786EDF54090AC4955FDFE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66984B7BA1940A9663C4BE5 /* Theme.swift */; };
 		76CF8583F8341542885F64B8 /* PlexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA2C942C241B0A28D81498E /* PlexModels.swift */; };
 		795C37DA9CEAAE0ED5522D00 /* BrowseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A74A4F9D276975EA1032192 /* BrowseView.swift */; };
+		7F6FBB1EB35B4044D8FEDFA1 /* DiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB184AE06DCD9EDFDB44A2BD /* DiskCache.swift */; };
 		876D701612735278CBFDE92E /* DiscoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EBC5E7CF31ED87935B7B2E1 /* DiscoverViewModel.swift */; };
 		898C5BCC32F7167143544813 /* PlexAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCEDDA0FCA06BF9B8EB67B7 /* PlexAuth.swift */; };
 		94A2AC31BF08ED3D5CDC1DD7 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E2A7CB848788CAF8BCE9F4 /* AppConfig.swift */; };
@@ -32,14 +36,27 @@
 		CAE920BF7FE66C61F49912B5 /* RemoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F323B4515EFBB017DDEDF4F6 /* RemoteImage.swift */; };
 		CD80CA81C47D316A939E7736 /* MainShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67D0726DE35DC16D0371CBD /* MainShell.swift */; };
 		D3D29AF2F7C5D38CC8DA67A0 /* TMDBModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BEFFAE807B0B85BECE2B0A /* TMDBModels.swift */; };
+		DA9E2BFC1B8630876BF31B97 /* DiskCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2DEABD16C6F22BFB2418F5 /* DiskCacheTests.swift */; };
 		DF37FA38AE6D571F075F6C1C /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7B41E2145B51EC448676D2 /* LibraryStore.swift */; };
 		EA6C3E472C8F42A6BB55091C /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A237F3E234F70AE87606901A /* RootView.swift */; };
 		EAC6481A5DE8CB1491CBC479 /* Glass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241783E74ECC9D51A0BC519D /* Glass.swift */; };
 		EC3F48C32B65390527199516 /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C140F6C0339964EAC4722555 /* DetailViewModel.swift */; };
+		F8C2F41474254918474BE8BE /* CacheFreshnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23BBEFD3C7FB6B603CEE76A /* CacheFreshnessTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8EB0FB78359C27136D203FE5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 471301E8178C012A6947AAF7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2DDF4D7F96E621B4586CB75;
+			remoteInfo = Reflix;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		03B12FB76CDDE6E94136052C /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
+		0A2DEABD16C6F22BFB2418F5 /* DiskCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskCacheTests.swift; sourceTree = "<group>"; };
 		0A74A4F9D276975EA1032192 /* BrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseView.swift; sourceTree = "<group>"; };
 		18A7E879AA7659BCA1EF2196 /* MediaCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCards.swift; sourceTree = "<group>"; };
 		1D7AE6DEA9CD0E1A6F1A964E /* MineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineView.swift; sourceTree = "<group>"; };
@@ -48,8 +65,10 @@
 		28583EBB9D7A322997C39811 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		3727320D51ABEB430B76B7AF /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3D885394BC6D7C502EED31A8 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
+		3DF8832E891C3D673BE79C6D /* ImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStore.swift; sourceTree = "<group>"; };
 		41F1B680CA26187D4EB91A9F /* PlexService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlexService.swift; sourceTree = "<group>"; };
 		43E2A7CB848788CAF8BCE9F4 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		44EE9DDD3E41F652D6584730 /* ImageStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStoreTests.swift; sourceTree = "<group>"; };
 		494EC91E9BC53068CA07C476 /* DiscoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverView.swift; sourceTree = "<group>"; };
 		64C15087E0C9B9BD430DFD65 /* AuthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStore.swift; sourceTree = "<group>"; };
 		6D1470B374849FC7BB597727 /* KeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyStore.swift; sourceTree = "<group>"; };
@@ -61,7 +80,11 @@
 		A237F3E234F70AE87606901A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		A74D2A3407F04E3C505BFD4C /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
 		C140F6C0339964EAC4722555 /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
+		C98D697EA965771AFF63585E /* ReflixTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ReflixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB184AE06DCD9EDFDB44A2BD /* DiskCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskCache.swift; sourceTree = "<group>"; };
 		CE98B590CDBEF961513CDB48 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E23BBEFD3C7FB6B603CEE76A /* CacheFreshnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheFreshnessTests.swift; sourceTree = "<group>"; };
+		E2863F55F41EF4326C742088 /* CachedAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedAsyncImage.swift; sourceTree = "<group>"; };
 		E66984B7BA1940A9663C4BE5 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		F2F9CAEA593FABE00279DF52 /* MineViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineViewModel.swift; sourceTree = "<group>"; };
 		F323B4515EFBB017DDEDF4F6 /* RemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImage.swift; sourceTree = "<group>"; };
@@ -108,6 +131,15 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		55B385892C92662514E91EDB /* Cache */ = {
+			isa = PBXGroup;
+			children = (
+				CB184AE06DCD9EDFDB44A2BD /* DiskCache.swift */,
+				3DF8832E891C3D673BE79C6D /* ImageStore.swift */,
+			);
+			path = Cache;
+			sourceTree = "<group>";
+		};
 		5DC2D033EBF7A38785158F5D /* Config */ = {
 			isa = PBXGroup;
 			children = (
@@ -120,6 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				2574487E7C95838554124782 /* Reflix.app */,
+				C98D697EA965771AFF63585E /* ReflixTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -186,6 +219,7 @@
 				FDCEDDA0FCA06BF9B8EB67B7 /* PlexAuth.swift */,
 				41F1B680CA26187D4EB91A9F /* PlexService.swift */,
 				A74D2A3407F04E3C505BFD4C /* TMDBService.swift */,
+				55B385892C92662514E91EDB /* Cache */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -202,11 +236,22 @@
 		CE7917303F855D753A011E42 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				E2863F55F41EF4326C742088 /* CachedAsyncImage.swift */,
 				28583EBB9D7A322997C39811 /* Common.swift */,
 				18A7E879AA7659BCA1EF2196 /* MediaCards.swift */,
 				F323B4515EFBB017DDEDF4F6 /* RemoteImage.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		E6CE13594E77E916779AA40E /* ReflixTests */ = {
+			isa = PBXGroup;
+			children = (
+				E23BBEFD3C7FB6B603CEE76A /* CacheFreshnessTests.swift */,
+				0A2DEABD16C6F22BFB2418F5 /* DiskCacheTests.swift */,
+				44EE9DDD3E41F652D6584730 /* ImageStoreTests.swift */,
+			);
+			path = ReflixTests;
 			sourceTree = "<group>";
 		};
 		EBC1308E74710EFD854F22C1 /* Auth */ = {
@@ -232,6 +277,7 @@
 			isa = PBXGroup;
 			children = (
 				1148E7655617BAA89158BE20 /* Reflix */,
+				E6CE13594E77E916779AA40E /* ReflixTests */,
 				7298A7D0CC31DC1AF2EE8625 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -239,6 +285,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5B8D53F05547CE13A94544BB /* ReflixTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17A16560B121C0A75094133C /* Build configuration list for PBXNativeTarget "ReflixTests" */;
+			buildPhases = (
+				C058CA5871501E635851B3C2 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EA1F166803B58B7CA325DB0D /* PBXTargetDependency */,
+			);
+			name = ReflixTests;
+			packageProductDependencies = (
+			);
+			productName = ReflixTests;
+			productReference = C98D697EA965771AFF63585E /* ReflixTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		B2DDF4D7F96E621B4586CB75 /* Reflix */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = EBD802C6FCAC0B46DA0CDD25 /* Build configuration list for PBXNativeTarget "Reflix" */;
@@ -266,6 +330,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					5B8D53F05547CE13A94544BB = {
+						ProvisioningStyle = Manual;
+					};
 					B2DDF4D7F96E621B4586CB75 = {
 						ProvisioningStyle = Manual;
 					};
@@ -286,6 +353,7 @@
 			projectRoot = "";
 			targets = (
 				B2DDF4D7F96E621B4586CB75 /* Reflix */,
+				5B8D53F05547CE13A94544BB /* ReflixTests */,
 			);
 		};
 /* End PBXProject section */
@@ -310,12 +378,15 @@
 				C684B9639C62CA187C63E3AD /* AuthStore.swift in Sources */,
 				030A85FCBFAB0E22AFC1D02A /* AuthView.swift in Sources */,
 				795C37DA9CEAAE0ED5522D00 /* BrowseView.swift in Sources */,
+				4D11091119F7B832C28BCFD7 /* CachedAsyncImage.swift in Sources */,
 				607D8D038E39C003EA7E6219 /* Common.swift in Sources */,
 				A5AAF859F7B59A5F44A86685 /* DetailView.swift in Sources */,
 				EC3F48C32B65390527199516 /* DetailViewModel.swift in Sources */,
 				CAB8572A9C9B79F9336B8F3B /* DiscoverView.swift in Sources */,
 				876D701612735278CBFDE92E /* DiscoverViewModel.swift in Sources */,
+				7F6FBB1EB35B4044D8FEDFA1 /* DiskCache.swift in Sources */,
 				EAC6481A5DE8CB1491CBC479 /* Glass.swift in Sources */,
+				2628F6A94CE0217967A8998F /* ImageStore.swift in Sources */,
 				16F2ECD2C6F1D6635A1D0906 /* KeyStore.swift in Sources */,
 				DF37FA38AE6D571F075F6C1C /* LibraryStore.swift in Sources */,
 				CD80CA81C47D316A939E7736 /* MainShell.swift in Sources */,
@@ -337,7 +408,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C058CA5871501E635851B3C2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F8C2F41474254918474BE8BE /* CacheFreshnessTests.swift in Sources */,
+				DA9E2BFC1B8630876BF31B97 /* DiskCacheTests.swift in Sources */,
+				05239F310EF7AB38D9514EE7 /* ImageStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EA1F166803B58B7CA325DB0D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2DDF4D7F96E621B4586CB75 /* Reflix */;
+			targetProxy = 8EB0FB78359C27136D203FE5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		27680E3CF90B4E499EE57739 /* Release */ = {
@@ -347,6 +436,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_TESTABILITY = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Reflix;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -430,6 +520,40 @@
 			};
 			name = Debug;
 		};
+		633A5BDDBB86AA02DE3D6522 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kunish.reflixTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Reflix.app/Reflix";
+			};
+			name = Release;
+		};
+		88C4638D18B584078B54BB55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kunish.reflixTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Reflix.app/Reflix";
+			};
+			name = Debug;
+		};
 		AE836A57EA2CCA3D2709D2ED /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -437,6 +561,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_TESTABILITY = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Reflix;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -516,6 +641,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		17A16560B121C0A75094133C /* Build configuration list for PBXNativeTarget "ReflixTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				88C4638D18B584078B54BB55 /* Debug */,
+				633A5BDDBB86AA02DE3D6522 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		21503C5FD94427B7886DA821 /* Build configuration list for PBXProject "Reflix" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

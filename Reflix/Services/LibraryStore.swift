@@ -69,7 +69,10 @@ struct LibraryItem: Codable, Identifiable, Hashable {
     }
 }
 
-/// PostgREST-backed repository + observable cache for the signed-in user's library.
+/// PostgREST-backed repository + observable cache for the signed-in user's
+/// library. Local-first: the last snapshot is persisted to disk and rendered
+/// instantly on launch; writes update the UI optimistically and roll back on
+/// failure.
 @MainActor
 final class LibraryStore: ObservableObject {
     @Published var itemsByList: [String: [LibraryItem]] = [:]
@@ -78,7 +81,14 @@ final class LibraryStore: ObservableObject {
     private unowned let auth: AuthStore
     private let net = URLSession(configuration: .default)
 
-    init(auth: AuthStore) { self.auth = auth }
+    init(auth: AuthStore) {
+        self.auth = auth
+        Task { await loadCachedSnapshot() }
+    }
+
+    /// Per-user cache key so multiple accounts on one device never see each
+    /// other's library.
+    private var cacheKey: String { "library-\(auth.session?.userId ?? "anon")" }
 
     func items(for list: LibraryList) -> [LibraryItem] {
         itemsByList[list.apiValue] ?? []
@@ -89,6 +99,16 @@ final class LibraryStore: ObservableObject {
     }
 
     // MARK: Reads
+
+    /// Renders the last persisted snapshot for an instant launch — only when
+    /// nothing is loaded yet, so it never clobbers fresher network data that a
+    /// concurrent `loadAll()` may have already produced.
+    private func loadCachedSnapshot() async {
+        guard itemsByList.isEmpty,
+              let entry = await DiskCache.shared.load(cacheKey, as: [String: [LibraryItem]].self)
+        else { return }
+        if itemsByList.isEmpty { itemsByList = entry.payload }
+    }
 
     func loadAll() async {
         isLoading = true
@@ -103,15 +123,22 @@ final class LibraryStore: ObservableObject {
             var grouped: [String: [LibraryItem]] = [:]
             for row in rows { grouped[row.listType, default: []].append(row) }
             itemsByList = grouped
+            await persistSnapshot()
         } catch {
             // Keep whatever is cached on a transient failure.
         }
     }
 
-    // MARK: Writes
+    // MARK: Writes (optimistic UI + online write, rollback on failure)
 
     func add(_ media: DetailLike, to list: LibraryList) async {
-        guard let token = await auth.validAccessToken() else { return }
+        let previous = itemsByList
+        insertOptimistic(optimisticItem(media, list: list), list: list)
+        await persistSnapshot()
+
+        guard let token = await auth.validAccessToken() else {
+            await rollback(to: previous); return
+        }
         var body: [String: Any] = [
             "tmdb_id": media.tmdbId,
             "media_type": media.mediaType.rawValue,
@@ -130,18 +157,33 @@ final class LibraryStore: ObservableObject {
             req.setValue("resolution=merge-duplicates,return=representation",
                          forHTTPHeaderField: "Prefer")
             req.httpBody = try JSONSerialization.data(withJSONObject: body)
-            _ = try await net.data(for: req)
-            await loadAll()
-        } catch { }
+            let (_, response) = try await net.data(for: req)
+            guard isSuccess(response) else { await rollback(to: previous); return }
+            await loadAll()   // reconcile with server-assigned ids / ordering
+        } catch {
+            await rollback(to: previous)
+        }
     }
 
     func remove(ref: MediaRef, from list: LibraryList) async {
-        guard let token = await auth.validAccessToken() else { return }
+        let previous = itemsByList
+        itemsByList[list.apiValue]?.removeAll {
+            $0.tmdbId == ref.id && $0.mediaType == ref.type.rawValue
+        }
+        await persistSnapshot()
+
+        guard let token = await auth.validAccessToken() else {
+            await rollback(to: previous); return
+        }
         let path = "/library_items?tmdb_id=eq.\(ref.id)&media_type=eq.\(ref.type.rawValue)&list_type=eq.\(list.apiValue)"
         var req = restRequest(path: path, token: token)
         req.httpMethod = "DELETE"
-        _ = try? await net.data(for: req)
-        await loadAll()
+        do {
+            let (_, response) = try await net.data(for: req)
+            guard isSuccess(response) else { await rollback(to: previous); return }
+        } catch {
+            await rollback(to: previous)
+        }
     }
 
     func toggle(_ media: DetailLike, in list: LibraryList) async {
@@ -150,6 +192,47 @@ final class LibraryStore: ObservableObject {
         } else {
             await add(media, to: list)
         }
+    }
+
+    // MARK: Optimistic helpers
+
+    private func optimisticItem(_ media: DetailLike, list: LibraryList) -> LibraryItem {
+        LibraryItem(
+            id: nil,
+            tmdbId: media.tmdbId,
+            mediaType: media.mediaType.rawValue,
+            listType: list.apiValue,
+            title: media.titleText,
+            posterPath: media.poster,
+            backdropPath: media.backdrop,
+            overview: media.overviewText,
+            season: nil,
+            episode: nil,
+            progressMinutes: nil,
+            runtimeMinutes: media.runtime,
+            addedAt: nil
+        )
+    }
+
+    private func insertOptimistic(_ item: LibraryItem, list: LibraryList) {
+        var arr = itemsByList[list.apiValue] ?? []
+        guard !arr.contains(where: { $0.tmdbId == item.tmdbId && $0.mediaType == item.mediaType })
+        else { return }
+        arr.insert(item, at: 0)
+        itemsByList[list.apiValue] = arr
+    }
+
+    private func rollback(to snapshot: [String: [LibraryItem]]) async {
+        itemsByList = snapshot
+        await persistSnapshot()
+    }
+
+    private func persistSnapshot() async {
+        await DiskCache.shared.save(cacheKey, itemsByList)
+    }
+
+    private func isSuccess(_ response: URLResponse) -> Bool {
+        (200..<300).contains((response as? HTTPURLResponse)?.statusCode ?? 0)
     }
 
     // MARK: Request builder

@@ -5,6 +5,8 @@ struct SettingsView: View {
     @EnvironmentObject private var plex: PlexStore
     @Environment(\.dismiss) private var dismiss
     @State private var showKeyEditor = false
+    @State private var cacheSize = 0
+    @State private var isClearingCache = false
 
     var body: some View {
         NavigationStack {
@@ -15,6 +17,7 @@ struct SettingsView: View {
                         accountCard
                         plexCard
                         tmdbCard
+                        cacheCard
                         signOutButton
                     }
                     .padding(20)
@@ -131,6 +134,60 @@ struct SettingsView: View {
             .background(RFX.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: Cache
+
+    private var cacheCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Label("缓存", systemImage: "internaldrive")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(RFX.text4)
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("图片与数据缓存")
+                        .font(.system(size: 16, weight: .semibold)).foregroundStyle(.white)
+                    Text(cacheSizeText)
+                        .font(.system(size: 13)).foregroundStyle(RFX.text3)
+                }
+                Spacer()
+                Button {
+                    Task { await clearCache() }
+                } label: {
+                    if isClearingCache {
+                        ProgressView().controlSize(.small).tint(.white)
+                    } else {
+                        Text("清除")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(Color(hex: 0xff6b6b))
+                    }
+                }
+                .disabled(isClearingCache || cacheSize == 0)
+            }
+        }
+        .padding(18)
+        .background(RFX.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .task { await refreshCacheSize() }
+    }
+
+    private var cacheSizeText: String {
+        cacheSize == 0
+            ? "暂无缓存"
+            : ByteCountFormatter.string(fromByteCount: Int64(cacheSize), countStyle: .file)
+    }
+
+    private func refreshCacheSize() async {
+        let images = await ImageStore.shared.diskUsageBytes()
+        let data = await DiskCache.shared.diskUsageBytes()
+        cacheSize = images + data
+    }
+
+    private func clearCache() async {
+        isClearingCache = true
+        await ImageStore.shared.clear()
+        await DiskCache.shared.clear()
+        await refreshCacheSize()
+        isClearingCache = false
     }
 
     private var signOutButton: some View {

@@ -13,15 +13,35 @@ final class DetailViewModel: ObservableObject {
     let ref: MediaRef
     init(ref: MediaRef) { self.ref = ref }
 
+    /// Cache-first: show the cached detail immediately, then revalidate from the
+    /// network only if it is older than the soft TTL. On a network failure the
+    /// cached detail is kept (no error shown).
     func load() async {
-        isLoading = true
-        error = nil
-        do {
-            detail = try await TMDBService.shared.detail(ref)
-        } catch {
-            self.error = (error as? LocalizedError)?.errorDescription ?? "加载详情失败"
+        let key = Self.cacheKey(ref)
+        if let entry = await DiskCache.shared.load(key, as: TMDBDetail.self) {
+            detail = entry.payload
+            isLoading = false
+            if entry.isFresh(ttl: CacheTTL.detail) { return }
+            await refresh(key: key)
+        } else {
+            isLoading = true
+            await refresh(key: key)
+            isLoading = false
         }
-        isLoading = false
+    }
+
+    private func refresh(key: String) async {
+        do {
+            let fresh = try await TMDBService.shared.detail(ref)
+            detail = fresh
+            error = nil
+            await DiskCache.shared.save(key, fresh)
+        } catch {
+            // Keep cached content if we have it; only surface an error on a cold miss.
+            if detail == nil {
+                self.error = (error as? LocalizedError)?.errorDescription ?? "加载详情失败"
+            }
+        }
     }
 
     /// Looks the title up in the user's connected Plex libraries (once).
@@ -46,6 +66,8 @@ final class DetailViewModel: ObservableObject {
             runtime: detail.runtimeMinutes
         )
     }
+
+    static func cacheKey(_ ref: MediaRef) -> String { "detail-\(ref.type.rawValue)-\(ref.id)" }
 }
 
 /// Concrete `DetailLike` used when saving a detail page to the library.
