@@ -146,3 +146,53 @@ struct AuthView: View {
         }
     }
 }
+
+/// 6 位验证码：可见格子 + 背后隐藏 TextField（支持 iOS 一次性验证码自动填充）。
+private struct OTPCodeField: View {
+    @Binding var code: String
+    var onComplete: (String) -> Void
+
+    @FocusState private var focused: Bool
+    private let count = 6
+
+    var body: some View {
+        ZStack {
+            TextField("", text: $code)
+                .keyboardType(.numberPad)
+                .textContentType(.oneTimeCode)
+                .focused($focused)
+                .opacity(0.001)                 // 保持可聚焦，但视觉隐藏
+                .onChange(of: code) { _, newValue in
+                    let digits = String(newValue.filter(\.isNumber).prefix(count))
+                    if digits != code { code = digits }
+                    if digits.count == count { onComplete(digits) }
+                }
+
+            HStack(spacing: 10) {
+                ForEach(0..<count, id: \.self) { index in
+                    box(at: index)
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { focused = true }
+        }
+        .onAppear { focused = true }
+    }
+
+    private func box(at index: Int) -> some View {
+        let chars = Array(code)
+        let char = index < chars.count ? String(chars[index]) : ""
+        let isCurrent = index == chars.count && focused
+        return Text(char)
+            .font(.system(size: 22, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(Color(hex: 0x0c0c0d), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(isCurrent ? RFX.accent : Color.white.opacity(0.14),
+                            lineWidth: isCurrent ? 1.5 : 0.5)
+            )
+    }
+}
