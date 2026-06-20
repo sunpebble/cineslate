@@ -52,6 +52,24 @@ final class AuthStore: ObservableObject {
         Keychain.clear()
     }
 
+    /// 发送 6 位邮箱验证码（注册即登录）。成功返回 true。
+    func sendEmailOTP(email: String) async -> Bool {
+        var ok = false
+        await run {
+            try await self.requestEmailOTP(email: email)
+            ok = true
+        }
+        return ok
+    }
+
+    /// 校验邮箱验证码并建立 session。
+    func verifyEmailOTP(email: String, code: String) async {
+        await run {
+            let session = try await self.verifyOTPToken(email: email, code: code)
+            self.persist(session)
+        }
+    }
+
     /// Returns a non-expired access token, refreshing first if needed.
     func validAccessToken() async -> String? {
         guard let current = session else { return nil }
@@ -86,6 +104,36 @@ final class AuthStore: ObservableObject {
         if code == 409 { return }
         let msg = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["message"] as? String
         throw AuthError.message(msg ?? "注册失败")
+    }
+
+    private func requestEmailOTP(email: String) async throws {
+        var req = URLRequest(url: URL(string: AppConfig.supabaseAuthURL + "/otp")!)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue(AppConfig.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        req.setValue("Bearer \(AppConfig.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try JSONSerialization.data(withJSONObject: [
+            "email": email, "create_user": true,
+        ])
+        let (data, response) = try await session_.data(for: req)
+        let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+        if code == 200 { return }
+        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let msg = (json?["msg"] as? String)
+            ?? (json?["error_description"] as? String)
+            ?? (json?["message"] as? String)
+        throw AuthError.message(localized(msg))
+    }
+
+    private func verifyOTPToken(email: String, code: String) async throws -> Session {
+        var req = URLRequest(url: URL(string: AppConfig.supabaseAuthURL + "/verify")!)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue(AppConfig.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        req.httpBody = try JSONSerialization.data(withJSONObject: [
+            "email": email, "token": code, "type": "email",
+        ])
+        return try await decodeToken(from: req, fallbackEmail: email)
     }
 
     private func passwordGrant(email: String, password: String) async throws -> Session {
@@ -154,8 +202,13 @@ final class AuthStore: ObservableObject {
 
     private func localized(_ message: String?) -> String {
         guard let message else { return "登录失败，请重试" }
-        if message.contains("Invalid login credentials") { return "邮箱或密码错误" }
-        if message.lowercased().contains("email not confirmed") { return "邮箱尚未验证" }
+        let lower = message.lowercased()
+        if lower.contains("invalid login credentials") { return "邮箱或密码错误" }
+        if lower.contains("email not confirmed") { return "邮箱尚未验证" }
+        if lower.contains("expired") || lower.contains("invalid token") { return "验证码错误或已过期" }
+        if lower.contains("for security purposes") || lower.contains("rate limit") || lower.contains("too many") {
+            return "操作过于频繁，请稍后再试"
+        }
         return message
     }
 
