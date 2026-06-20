@@ -73,10 +73,14 @@ final class PlexAuth: NSObject, ASWebAuthenticationPresentationContextProviding 
     }
 
     private func buildAuthURL(code: String) -> URL {
-        var items = [
+        // Intentionally NO forwardUrl: a custom-scheme forwardUrl (reflix://…)
+        // makes Plex skip the device-authorisation screen and bounce to its home
+        // page without ever linking the PIN. The native flow links the PIN on
+        // that screen and we pick up the token by polling, so no redirect back
+        // into the app is needed.
+        let items = [
             URLQueryItem(name: "clientID", value: KeyStore.plexClientID),
             URLQueryItem(name: "code", value: code),
-            URLQueryItem(name: "forwardUrl", value: AppConfig.plexForwardURL),
             URLQueryItem(name: "context[device][product]", value: AppConfig.plexProduct),
         ]
         var comps = URLComponents()

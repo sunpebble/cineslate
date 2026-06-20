@@ -1,8 +1,11 @@
 import SwiftUI
 import AVKit
+import AVFoundation
+import UIKit
 
-/// Full-screen Plex player: native AVKit transport controls, an OpenSubtitles
-/// overlay we render ourselves, and a subtitle-track picker.
+/// Full-screen Plex player: a controls-less AVPlayer surface with our own glass
+/// transport controls (a single control layer — not the native bar stacked under
+/// ours), an OpenSubtitles overlay we render ourselves, and a subtitle picker.
 struct PlayerView: View {
     let context: PlayerContext
 
@@ -10,6 +13,10 @@ struct PlayerView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var model: PlayerViewModel
     @State private var showSubtitlePicker = false
+    @State private var showControls = true
+    @State private var scrubbing = false
+    @State private var scrubValue: Double = 0
+    @State private var hideTask: Task<Void, Never>?
 
     init(context: PlayerContext) {
         self.context = context
@@ -20,23 +27,120 @@ struct PlayerView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            VideoPlayer(player: model.player) {
-                subtitleOverlay
-            }
-            .ignoresSafeArea()
+            // Controls-less surface (AVPlayerLayer): our glass controls below are
+            // the only control layer, so the native transport bar no longer stacks
+            // under ours (the "double controls" of SwiftUI's VideoPlayer).
+            PlayerSurface(player: model.player)
+                .ignoresSafeArea()
 
-            topBar
+            subtitleOverlay
+                .allowsHitTesting(false)
+
+            if showControls {
+                controlsLayer.transition(.opacity)
+            } else {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { setControls(true) }
+            }
+
             centerState
         }
         .statusBarHidden(true)
         .task { await model.start(plex: plex) }
-        .onDisappear { Task { await model.teardown() } }
+        .onAppear { setControls(true) }
+        .onDisappear { hideTask?.cancel(); Task { await model.teardown() } }
+        .onChange(of: model.currentTime) { _, t in if !scrubbing { scrubValue = t } }
+        .onChange(of: model.isPlaying) { _, _ in scheduleAutoHide() }
         .sheet(isPresented: $showSubtitlePicker) {
             SubtitlePickerSheet(model: model)
         }
     }
 
-    // MARK: Subtitle overlay (rendered above video, below native controls)
+    // MARK: Controls
+
+    private var controlsLayer: some View {
+        ZStack {
+            Color.black.opacity(0.28).ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture { setControls(false) }
+
+            VStack(spacing: 0) {
+                topBar
+                Spacer()
+                if model.phase == .ready { bottomBar }
+            }
+
+            if model.phase == .ready {
+                HStack(spacing: 40) {
+                    transportButton("gobackward.10", size: 26) { model.skip(-10); scheduleAutoHide() }
+                    transportButton(model.isPlaying ? "pause.fill" : "play.fill", size: 36) {
+                        model.togglePlayPause(); scheduleAutoHide()
+                    }
+                    transportButton("goforward.10", size: 26) { model.skip(10); scheduleAutoHide() }
+                }
+            }
+        }
+    }
+
+    private func transportButton(_ name: String, size: CGFloat, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: name)
+                .font(.system(size: size, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 66, height: 66)
+                .contentShape(Circle())
+                .shadow(color: .black.opacity(0.4), radius: 4)
+        }
+    }
+
+    private var bottomBar: some View {
+        VStack(spacing: 6) {
+            Slider(value: $scrubValue, in: 0...max(model.duration, 1)) { editing in
+                scrubbing = editing
+                if editing { hideTask?.cancel() } else { model.seek(to: scrubValue); setControls(true) }
+            }
+            .tint(RFX.accent)
+
+            HStack {
+                Text(timeString(scrubbing ? scrubValue : model.currentTime))
+                Spacer()
+                Text("-" + timeString(max(model.duration - (scrubbing ? scrubValue : model.currentTime), 0)))
+            }
+            .font(.system(size: 12, weight: .medium))
+            .monospacedDigit()
+            .foregroundStyle(.white.opacity(0.85))
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 28)
+    }
+
+    private func timeString(_ seconds: Double) -> String {
+        guard seconds.isFinite, seconds >= 0 else { return "0:00" }
+        let total = Int(seconds)
+        let h = total / 3600, m = (total % 3600) / 60, s = total % 60
+        return h > 0 ? String(format: "%d:%02d:%02d", h, m, s) : String(format: "%d:%02d", m, s)
+    }
+
+    // MARK: Controls visibility
+
+    private func setControls(_ visible: Bool) {
+        withAnimation(.easeInOut(duration: 0.2)) { showControls = visible }
+        scheduleAutoHide()
+    }
+
+    /// Auto-hides the controls a few seconds after they appear, while playing.
+    private func scheduleAutoHide() {
+        hideTask?.cancel()
+        guard showControls, model.isPlaying, !scrubbing else { return }
+        hideTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 4_000_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.2)) { showControls = false }
+        }
+    }
+
+    // MARK: Subtitle overlay (rendered above video, below controls)
 
     @ViewBuilder private var subtitleOverlay: some View {
         if !model.currentCue.isEmpty {
@@ -52,47 +156,44 @@ struct PlayerView: View {
                     .padding(.vertical, 5)
                     .background(.black.opacity(0.32), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .padding(.horizontal, 26)
-                    .padding(.bottom, 72)
+                    .padding(.bottom, showControls ? 116 : 72)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .allowsHitTesting(false)
+            .animation(.easeInOut(duration: 0.2), value: showControls)
         }
     }
 
     // MARK: Top bar (close · title · subtitle picker)
 
     private var topBar: some View {
-        VStack {
-            HStack(spacing: 12) {
-                Button { dismiss() } label: {
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 40, height: 40)
-                }
-                .glassCircle()
-
-                Text(model.title)
-                    .font(.system(size: 15, weight: .bold))
+        HStack(spacing: 12) {
+            Button { dismiss() } label: {
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .shadow(color: .black.opacity(0.6), radius: 4)
-
-                Spacer(minLength: 8)
-
-                Button { showSubtitlePicker = true } label: {
-                    Image(systemName: model.activeFileId != nil ? "captions.bubble.fill" : "captions.bubble")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(model.activeFileId != nil ? RFX.accent : .white)
-                        .frame(width: 40, height: 40)
-                }
-                .glassCircle()
+                    .frame(width: 40, height: 40)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .glassCircle()
 
-            Spacer()
+            Text(model.title)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .shadow(color: .black.opacity(0.6), radius: 4)
+
+            Spacer(minLength: 8)
+
+            Button { showSubtitlePicker = true; scheduleAutoHide() } label: {
+                Image(systemName: model.activeFileId != nil ? "captions.bubble.fill" : "captions.bubble")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(model.activeFileId != nil ? RFX.accent : .white)
+                    .frame(width: 40, height: 40)
+            }
+            .glassCircle()
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
     }
 
     // MARK: Center state (loading / error)
@@ -125,6 +226,27 @@ struct PlayerView: View {
             EmptyView()
         }
     }
+}
+
+/// A controls-less video surface backed directly by AVPlayerLayer.
+private struct PlayerSurface: UIViewRepresentable {
+    let player: AVPlayer
+
+    func makeUIView(context: Context) -> PlayerLayerView {
+        let view = PlayerLayerView()
+        view.playerLayer.player = player
+        view.playerLayer.videoGravity = .resizeAspect
+        return view
+    }
+
+    func updateUIView(_ uiView: PlayerLayerView, context: Context) {
+        if uiView.playerLayer.player !== player { uiView.playerLayer.player = player }
+    }
+}
+
+private final class PlayerLayerView: UIView {
+    override class var layerClass: AnyClass { AVPlayerLayer.self }
+    var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
 }
 
 // MARK: - Subtitle picker

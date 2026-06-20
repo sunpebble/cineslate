@@ -6,6 +6,10 @@ final class DiscoverViewModel: ObservableObject {
     @Published var rankedTV: [TMDBMedia] = []
     @Published var trendingTV: [TMDBMedia] = []
     @Published var people: [TMDBMedia] = []
+    /// Studio browse-card logos, keyed by `networkId` (empty → gradient fallback).
+    @Published var studioLogos: [Int: String] = [:]
+    /// Representative backdrop per genre card, keyed by `genreId`.
+    @Published var genreBackdrops: [Int: String] = [:]
     @Published var isLoading = false
     @Published var loadError: String?
 
@@ -37,6 +41,11 @@ final class DiscoverViewModel: ObservableObject {
             hasLoaded = true
             if !entry.isFresh(ttl: CacheTTL.discover) {
                 await reload()
+            } else if studioLogos.isEmpty || genreBackdrops.isEmpty {
+                // Snapshot predates the artwork fields (or a prior fetch failed):
+                // backfill the logos/backdrops without forcing a full feed refresh.
+                await loadArtwork()
+                await DiskCache.shared.save(Self.cacheKey, snapshot())
             }
         } else {
             await reload()
@@ -64,6 +73,7 @@ final class DiscoverViewModel: ObservableObject {
             trendingTV = Array(popular.prefix(8))
             people = Array(persons.prefix(10))
             hasLoaded = true
+            await loadArtwork()
             await DiskCache.shared.save(Self.cacheKey, snapshot())
         } catch {
             loadError = (error as? LocalizedError)?.errorDescription ?? "加载失败，请检查网络或 API Key"
@@ -71,8 +81,36 @@ final class DiscoverViewModel: ObservableObject {
         isLoading = false
     }
 
+    /// Best-effort load of the (near-static) studio logos and a representative
+    /// backdrop per genre. Failures leave the gradient fallback in place and are
+    /// never surfaced as a feed-level error.
+    private func loadArtwork() async {
+        await withTaskGroup(of: (Int, String?).self) { group in
+            for studio in studios {
+                group.addTask {
+                    (studio.networkId, (try? await TMDBService.shared.networkLogoPath(studio.networkId)) ?? nil)
+                }
+            }
+            for await (id, path) in group {
+                if let path { studioLogos[id] = path }
+            }
+        }
+        await withTaskGroup(of: (Int, String?).self) { group in
+            for genre in genres {
+                group.addTask {
+                    let list = try? await TMDBService.shared.discover(type: .movie, genre: genre.genreId)
+                    return (genre.genreId, list?.first(where: { $0.backdropPath != nil })?.backdropPath)
+                }
+            }
+            for await (id, path) in group {
+                if let path { genreBackdrops[id] = path }
+            }
+        }
+    }
+
     private func snapshot() -> DiscoverSnapshot {
-        DiscoverSnapshot(heroes: heroes, rankedTV: rankedTV, trendingTV: trendingTV, people: people)
+        DiscoverSnapshot(heroes: heroes, rankedTV: rankedTV, trendingTV: trendingTV, people: people,
+                         studioLogos: studioLogos, genreBackdrops: genreBackdrops)
     }
 
     private func apply(_ snapshot: DiscoverSnapshot) {
@@ -80,6 +118,8 @@ final class DiscoverViewModel: ObservableObject {
         rankedTV = snapshot.rankedTV
         trendingTV = snapshot.trendingTV
         people = snapshot.people
+        studioLogos = snapshot.studioLogos ?? [:]
+        genreBackdrops = snapshot.genreBackdrops ?? [:]
     }
 }
 
@@ -89,6 +129,9 @@ struct DiscoverSnapshot: Codable {
     var rankedTV: [TMDBMedia]
     var trendingTV: [TMDBMedia]
     var people: [TMDBMedia]
+    // Optional so snapshots persisted before these fields existed still decode.
+    var studioLogos: [Int: String]?
+    var genreBackdrops: [Int: String]?
 }
 
 struct GenreCard: Identifiable, Hashable {

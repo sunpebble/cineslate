@@ -212,7 +212,7 @@ private struct FeaturedCard: View {
         Button(action: onTap) {
             ZStack(alignment: .bottomLeading) {
                 RemoteImage(path: backdropPath, size: .w780, seed: seed)
-                    .frame(height: 230)
+                    .frame(maxWidth: .infinity, minHeight: 230, maxHeight: 230)
 
                 LinearGradient(
                     stops: [.init(color: .black.opacity(0.1), location: 0.3),

@@ -67,7 +67,9 @@ final class DetailViewModel: ObservableObject {
         )
     }
 
-    static func cacheKey(_ ref: MediaRef) -> String { "detail-\(ref.type.rawValue)-\(ref.id)" }
+    // v2: detail payload now carries images.posters / images.logos — bumping the
+    // key forces a one-time refetch so pre-existing caches don't hide them.
+    static func cacheKey(_ ref: MediaRef) -> String { "detail-v2-\(ref.type.rawValue)-\(ref.id)" }
 }
 
 /// Concrete `DetailLike` used when saving a detail page to the library.

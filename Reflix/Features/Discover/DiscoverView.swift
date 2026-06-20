@@ -143,6 +143,13 @@ struct DiscoverView: View {
                         Button { router.browse(.genre(genre)) } label: {
                             ZStack(alignment: .bottomLeading) {
                                 genre.gradient
+                                if let backdrop = model.genreBackdrops[genre.genreId] {
+                                    RemoteImage(path: backdrop, size: .w780, seed: genre.name)
+                                    // Darken the lower half so the white title stays
+                                    // legible over an arbitrary backdrop.
+                                    LinearGradient(colors: [.clear, .black.opacity(0.55)],
+                                                   startPoint: .center, endPoint: .bottom)
+                                }
                                 Text(genre.name)
                                     .font(.system(size: 28, weight: .black))
                                     .foregroundStyle(.white)
@@ -173,9 +180,19 @@ struct DiscoverView: View {
                     ForEach(model.studios) { studio in
                         Button { router.browse(.studio(studio)) } label: {
                             VStack(spacing: 8) {
-                                studio.gradient
-                                    .frame(width: 118, height: 120)
-                                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                ZStack {
+                                    studio.gradient
+                                    if let logo = model.studioLogos[studio.networkId] {
+                                        // Logos are transparent PNGs — sit them on the
+                                        // gradient, fit + inset so the wordmark is whole.
+                                        CachedAsyncImage(url: tmdbImageURL(logo, .w342),
+                                                         contentMode: .fit) { Color.clear }
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 26)
+                                    }
+                                }
+                                .frame(width: 118, height: 120)
+                                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                                 Text(studio.name)
                                     .font(.system(size: 16, weight: .heavy))
                                     .kerning(0.5)

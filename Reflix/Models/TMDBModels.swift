@@ -129,11 +129,20 @@ struct TMDBCredits: Codable, Hashable {
 
 struct TMDBImage: Codable, Hashable {
     let filePath: String
-    enum CodingKeys: String, CodingKey { case filePath = "file_path" }
+    let iso6391: String?        // language of a localized image (logos / posters)
+    let voteAverage: Double?
+    enum CodingKeys: String, CodingKey {
+        case filePath = "file_path"
+        case iso6391 = "iso_639_1"
+        case voteAverage = "vote_average"
+    }
 }
 
 struct TMDBImages: Codable, Hashable {
     let backdrops: [TMDBImage]
+    let posters: [TMDBImage]?
+    /// Title-art treatments (transparent PNGs of the title), language-tagged.
+    let logos: [TMDBImage]?
 }
 
 /// IMDb id for cross-referencing OpenSubtitles (movies are most reliable).
@@ -178,6 +187,35 @@ struct TMDBDetail: Codable, Identifiable {
 
     var displayTitle: String { title ?? name ?? "" }
 
+    /// Background art for the hero. Prefers a textless (language-neutral) poster
+    /// so the overlaid title logo isn't fighting a title baked into the artwork;
+    /// falls back to the localized poster, then the backdrop.
+    var heroPosterPath: String? {
+        let textless = (images?.posters ?? [])
+            .filter { $0.iso6391 == nil }
+            .max { ($0.voteAverage ?? 0) < ($1.voteAverage ?? 0) }
+        return textless?.filePath ?? posterPath ?? backdropPath
+    }
+
+    /// Best title-art logo path (transparent PNG), preferring Chinese, then
+    /// English, then language-neutral; ties broken by TMDB vote. Nil when none —
+    /// the caller then falls back to the plain text title.
+    var titleLogoPath: String? {
+        guard let logos = images?.logos, !logos.isEmpty else { return nil }
+        func rank(_ iso: String?) -> Int {
+            switch iso {
+            case "zh": return 0
+            case "en": return 1
+            case nil, "": return 2
+            default: return 3
+            }
+        }
+        return logos.min { a, b in
+            let (ra, rb) = (rank(a.iso6391), rank(b.iso6391))
+            return ra != rb ? ra < rb : (a.voteAverage ?? 0) > (b.voteAverage ?? 0)
+        }?.filePath
+    }
+
     var year: String? {
         let raw = releaseDate ?? firstAirDate
         guard let raw, raw.count >= 4 else { return nil }
@@ -219,4 +257,15 @@ enum TMDBImageSize: String {
 func tmdbImageURL(_ path: String?, _ size: TMDBImageSize) -> URL? {
     guard let path, !path.isEmpty else { return nil }
     return URL(string: AppConfig.tmdbImageBase + size.rawValue + path)
+}
+
+/// `/network/{id}/images` response (studio browse-card logos).
+///
+/// A dedicated type — not the existing `TMDBImages` — because that endpoint
+/// returns only `logos` (no `backdrops`/`posters`), so it cannot decode into a
+/// model whose `backdrops` field is required. Every `file_path` is served as a
+/// rasterised, transparent PNG by the TMDB CDN even when the source asset is an
+/// SVG (`file_type == ".svg"`), so `UIImage` can decode any entry as-is.
+struct TMDBNetworkImages: Decodable {
+    let logos: [TMDBImage]
 }

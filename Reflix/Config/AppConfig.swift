@@ -24,5 +24,4 @@ enum AppConfig {
     static let plexUserURL = "https://plex.tv/api/v2/user"
     /// ASWebAuthenticationSession callback scheme (no Info.plist registration needed).
     static let plexCallbackScheme = "reflix"
-    static let plexForwardURL = "reflix://plex-auth"
 }

@@ -80,7 +80,7 @@ struct RankedCard: View {
                         .font(.system(size: 54, weight: .black))
                         .foregroundStyle(.white)
                     RemoteImage(path: media.posterPath ?? media.backdropPath, size: .w342, seed: media.displayTitle)
-                        .frame(height: 118)
+                        .frame(width: 79, height: 118)
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .shadow(color: .black.opacity(0.4), radius: 8, y: 6)
                 }
@@ -95,7 +95,7 @@ struct RankedCard: View {
                     .lineLimit(1)
                     .padding(.top, 2)
             }
-            .frame(width: 188, alignment: .leading)
+            .frame(width: 150, alignment: .leading)
         }
         .buttonStyle(.plain)
     }

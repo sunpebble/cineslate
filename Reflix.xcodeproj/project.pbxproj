@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		030A85FCBFAB0E22AFC1D02A /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92C75523A6ED36922341B3A /* AuthView.swift */; };
 		05239F310EF7AB38D9514EE7 /* ImageStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44EE9DDD3E41F652D6584730 /* ImageStoreTests.swift */; };
+		DAE5C0FF1A2B3C4D5E6F7081 /* DiscoverArtworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED1234C0DEBA5E9876ABCD /* DiscoverArtworkTests.swift */; };
 		0C7457745A1923ADF82E99DD /* MediaCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A7E879AA7659BCA1EF2196 /* MediaCards.swift */; };
 		16F2ECD2C6F1D6635A1D0906 /* KeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D1470B374849FC7BB597727 /* KeyStore.swift */; };
 		1F772BDFC99BA1D2C279E3C0 /* MediaCodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F862483C675B24DA0521695F /* MediaCodingTests.swift */; };
@@ -76,6 +77,7 @@
 		41F1B680CA26187D4EB91A9F /* PlexService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlexService.swift; sourceTree = "<group>"; };
 		43E2A7CB848788CAF8BCE9F4 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		44EE9DDD3E41F652D6584730 /* ImageStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStoreTests.swift; sourceTree = "<group>"; };
+		FEED1234C0DEBA5E9876ABCD /* DiscoverArtworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverArtworkTests.swift; sourceTree = "<group>"; };
 		494EC91E9BC53068CA07C476 /* DiscoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverView.swift; sourceTree = "<group>"; };
 		64C15087E0C9B9BD430DFD65 /* AuthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStore.swift; sourceTree = "<group>"; };
 		6D1470B374849FC7BB597727 /* KeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyStore.swift; sourceTree = "<group>"; };
@@ -278,6 +280,7 @@
 				0A2DEABD16C6F22BFB2418F5 /* DiskCacheTests.swift */,
 				44EE9DDD3E41F652D6584730 /* ImageStoreTests.swift */,
 				F862483C675B24DA0521695F /* MediaCodingTests.swift */,
+				FEED1234C0DEBA5E9876ABCD /* DiscoverArtworkTests.swift */,
 			);
 			path = ReflixTests;
 			sourceTree = "<group>";
@@ -449,6 +452,7 @@
 				DA9E2BFC1B8630876BF31B97 /* DiskCacheTests.swift in Sources */,
 				05239F310EF7AB38D9514EE7 /* ImageStoreTests.swift in Sources */,
 				1F772BDFC99BA1D2C279E3C0 /* MediaCodingTests.swift in Sources */,
+				DAE5C0FF1A2B3C4D5E6F7081 /* DiscoverArtworkTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -24,6 +24,11 @@ final class PlayerViewModel: ObservableObject {
     @Published private(set) var subtitleStatus: SubtitleStatus
     @Published private(set) var activeFileId: Int?
 
+    // Transport state, driven by the player so our custom controls can reflect it.
+    @Published private(set) var isPlaying = false
+    @Published private(set) var currentTime: Double = 0
+    @Published private(set) var duration: Double = 0
+
     let player = AVPlayer()
 
     private let context: PlayerContext
@@ -34,6 +39,7 @@ final class PlayerViewModel: ObservableObject {
     private var lastCueIndex = 0
     private var timeObserver: Any?
     private var statusCancellable: AnyCancellable?
+    private var timeControlCancellable: AnyCancellable?
     private var torndown = false
     private var subtitleGeneration = 0
 
@@ -67,7 +73,9 @@ final class PlayerViewModel: ObservableObject {
         let item = AVPlayerItem(url: playable.url)
         observeStatus(of: item)
         player.replaceCurrentItem(with: item)
+        duration = playable.durationSeconds ?? 0
         installTimeObserver()
+        observeTimeControl()
         player.play()
 
         if subtitlesConfigured { await loadSubtitleOptions() }
@@ -77,6 +85,7 @@ final class PlayerViewModel: ObservableObject {
         torndown = true
         if let timeObserver { player.removeTimeObserver(timeObserver); self.timeObserver = nil }
         statusCancellable = nil
+        timeControlCancellable = nil
         player.pause()
         player.replaceCurrentItem(with: nil)
         if let playable, let plex { await plex.stopPlayback(playable) }
@@ -152,8 +161,39 @@ final class PlayerViewModel: ObservableObject {
         let interval = CMTime(seconds: 0.25, preferredTimescale: 600)
         timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             // The observer is pinned to the main queue, so we're on the main actor.
-            MainActor.assumeIsolated { self?.updateCue(at: time.seconds) }
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                let seconds = time.seconds
+                if seconds.isFinite { self.currentTime = seconds }
+                if self.duration <= 0, let itemDuration = self.player.currentItem?.duration.seconds,
+                   itemDuration.isFinite, itemDuration > 0 {
+                    self.duration = itemDuration
+                }
+                self.updateCue(at: seconds)
+            }
         }
+    }
+
+    private func observeTimeControl() {
+        timeControlCancellable = player.publisher(for: \.timeControlStatus)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in self?.isPlaying = (status == .playing) }
+    }
+
+    // MARK: Transport
+
+    func togglePlayPause() {
+        player.timeControlStatus == .playing ? player.pause() : player.play()
+    }
+
+    func skip(_ delta: Double) { seek(to: currentTime + delta) }
+
+    func seek(to seconds: Double) {
+        let upperBound = duration > 0 ? duration : seconds
+        let clamped = max(0, min(seconds, upperBound))
+        player.seek(to: CMTime(seconds: clamped, preferredTimescale: 600),
+                    toleranceBefore: .zero, toleranceAfter: .zero)
+        currentTime = clamped
     }
 
     /// O(1) amortised forward scan with a cached index; resets on backward seek.

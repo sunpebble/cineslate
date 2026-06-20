@@ -8,6 +8,7 @@ import UIKit
 /// a miss falls back to the async memory → disk → network pipeline.
 struct CachedAsyncImage<Placeholder: View>: View {
     let url: URL?
+    var contentMode: ContentMode = .fill
     @ViewBuilder var placeholder: () -> Placeholder
 
     @State private var image: UIImage?
@@ -17,7 +18,7 @@ struct CachedAsyncImage<Placeholder: View>: View {
             if let image {
                 Image(uiImage: image)
                     .resizable()
-                    .scaledToFill()
+                    .aspectRatio(contentMode: contentMode)
             } else {
                 placeholder()
             }

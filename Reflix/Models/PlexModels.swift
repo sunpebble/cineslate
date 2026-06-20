@@ -73,13 +73,14 @@ struct PlexMetadata: Decodable {
     let title: String?
     let type: String?
     let year: Int?
+    let index: Int?             // season number / episode number within a container
     let duration: Int?          // ms
     let guid: String?
     let media: [PlexMedia]?
     let guids: [PlexGuid]?
 
     enum CodingKeys: String, CodingKey {
-        case ratingKey, title, type, year, duration, guid
+        case ratingKey, title, type, year, index, duration, guid
         case media = "Media"
         case guids = "Guid"
     }

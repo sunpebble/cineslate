@@ -93,7 +93,10 @@ struct DetailView: View {
 
     private var hero: some View {
         ZStack(alignment: .bottom) {
-            RemoteImage(path: model.detail?.backdropPath ?? model.detail?.posterPath,
+            // Textless portrait poster fills the tall (full-width × 640) hero with
+            // almost no crop AND carries no baked-in title, so the logo overlay
+            // below is the only title shown.
+            RemoteImage(path: model.detail?.heroPosterPath,
                         size: .original, seed: model.detail?.displayTitle ?? "\(ref.id)")
                 .frame(height: 640)
                 .clipped()
@@ -108,14 +111,7 @@ struct DetailView: View {
             )
 
             VStack(spacing: 0) {
-                Text(model.detail?.displayTitle ?? "")
-                    .font(.system(size: 44, weight: .black))
-                    .kerning(2)
-                    .foregroundStyle(RFX.accent)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(3)
-                    .minimumScaleFactor(0.5)
-                    .shadow(color: .black.opacity(0.6), radius: 16, y: 2)
+                heroTitle
 
                 if let detail = model.detail {
                     Text(detail.metaLine(type: ref.type))
@@ -130,6 +126,26 @@ struct DetailView: View {
             .padding(.bottom, 18)
         }
         .frame(height: 640)
+    }
+
+    /// Title-art logo when TMDB has one (preferred), else the plain text title.
+    @ViewBuilder private var heroTitle: some View {
+        if let logo = model.detail?.titleLogoPath {
+            CachedAsyncImage(url: tmdbImageURL(logo, .w500), contentMode: .fit) { Color.clear }
+                .frame(height: 92)
+                .frame(maxWidth: .infinity)
+                .shadow(color: .black.opacity(0.55), radius: 14, y: 2)
+                .padding(.horizontal, 24)
+        } else {
+            Text(model.detail?.displayTitle ?? "")
+                .font(.system(size: 44, weight: .black))
+                .kerning(2)
+                .foregroundStyle(RFX.accent)
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+                .minimumScaleFactor(0.5)
+                .shadow(color: .black.opacity(0.6), radius: 16, y: 2)
+        }
     }
 
     // MARK: Source card — Plex-aware

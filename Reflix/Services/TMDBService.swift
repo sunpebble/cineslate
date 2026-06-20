@@ -28,11 +28,13 @@ final class TMDBService {
 
     private func get<T: Decodable>(_ path: String,
                                    query: [URLQueryItem] = [],
-                                   language: String = "zh-CN") async throws -> T {
+                                   language: String? = "zh-CN") async throws -> T {
         var comps = URLComponents(string: AppConfig.tmdbBaseURL + path)!
         var items = query
         items.append(URLQueryItem(name: "api_key", value: KeyStore.tmdbKey))
-        items.append(URLQueryItem(name: "language", value: language))
+        // Some endpoints (e.g. network logos) must NOT be language-filtered, so
+        // `language: nil` skips the parameter entirely rather than narrowing.
+        if let language { items.append(URLQueryItem(name: "language", value: language)) }
         items.append(URLQueryItem(name: "include_adult", value: "false"))
         comps.queryItems = items
 
@@ -73,6 +75,15 @@ final class TMDBService {
         if let network, type == .tv { q.append(URLQueryItem(name: "with_networks", value: String(network))) }
         let r: TMDBPagedResponse<TMDBMedia> = try await get("/discover/\(type.rawValue)", query: q)
         return tag(r.results, type)
+    }
+
+    /// First available logo path for a TMDB network (studio browse cards), or nil.
+    ///
+    /// No `language` filter: network logos carry `iso_639_1 == null`, so a
+    /// language query would filter every one of them out.
+    func networkLogoPath(_ networkId: Int) async throws -> String? {
+        let r: TMDBNetworkImages = try await get("/network/\(networkId)/images", language: nil)
+        return r.logos.first?.filePath
     }
 
     func search(_ query: String) async throws -> [TMDBMedia] {

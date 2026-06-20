@@ -124,10 +124,13 @@ struct PlexService {
     /// handle the file as-is, otherwise an HLS transcode session.
     func fetchPlayable(server: PlexServer, ratingKey: String) async -> PlexPlayable? {
         for base in server.connectionURIs {
-            guard let meta = await fetchMetadata(base: base, token: server.accessToken, ratingKey: ratingKey),
+            // A show/season ratingKey carries no media of its own — drill down to
+            // the first episode. Movies/episodes resolve to themselves.
+            guard let meta = await resolvePlayableMetadata(base: base, token: server.accessToken, ratingKey: ratingKey),
+                  let playKey = meta.ratingKey,
                   let media = meta.media?.first,
                   let part = media.parts?.first
-            else { continue }  // unreachable / no media → next connection
+            else { continue }  // unreachable / no playable media → next connection
 
             let title = meta.title ?? "正在播放"
             let durationMs = part.duration ?? media.duration ?? meta.duration
@@ -144,7 +147,7 @@ struct PlexService {
             }
 
             let session = UUID().uuidString
-            let url = transcodeURL(base: base, ratingKey: ratingKey, token: server.accessToken,
+            let url = transcodeURL(base: base, ratingKey: playKey, token: server.accessToken,
                                    session: session, resolution: media.pixelResolution,
                                    maxBitrate: media.bitrate)
             return PlexPlayable(url: url, isTranscoded: true, title: title,
@@ -152,6 +155,45 @@ struct PlexService {
                                 token: server.accessToken, session: session)
         }
         return nil
+    }
+
+    /// Walks a ratingKey down to a concrete, playable item. A movie or episode
+    /// already carries Media/Part and resolves to itself; a show resolves to its
+    /// first season's first episode, a season to its first episode.
+    private func resolvePlayableMetadata(base: URL, token: String,
+                                         ratingKey: String, depth: Int = 0) async -> PlexMetadata? {
+        guard let meta = await fetchMetadata(base: base, token: token, ratingKey: ratingKey) else { return nil }
+        if meta.media?.first?.parts?.first != nil { return meta }   // already playable
+        guard depth < 3,                                            // show → season → episode
+              let children = await fetchChildren(base: base, token: token, ratingKey: ratingKey),
+              let next = firstPlayableChild(children)?.ratingKey
+        else { return nil }
+        return await resolvePlayableMetadata(base: base, token: token, ratingKey: next, depth: depth + 1)
+    }
+
+    /// Children of a container: a show's seasons, or a season's episodes.
+    private func fetchChildren(base: URL, token: String, ratingKey: String) async -> [PlexMetadata]? {
+        guard var comps = URLComponents(url: base, resolvingAgainstBaseURL: false) else { return nil }
+        comps.path = "/library/metadata/\(ratingKey)/children"
+        guard let url = comps.url else { return nil }
+
+        var req = URLRequest(url: url)
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        req.setValue(token, forHTTPHeaderField: "X-Plex-Token")
+        PlexAuth.headers(token: token).forEach { req.setValue($1, forHTTPHeaderField: $0) }
+
+        guard let (data, response) = try? await session.data(for: req),
+              let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode),
+              let container = try? JSONDecoder().decode(PlexMediaContainerResponse.self, from: data)
+        else { return nil }
+        return container.mediaContainer.metadata
+    }
+
+    /// Lowest-numbered child, skipping Specials (season/episode index 0) when a
+    /// regular one exists. Falls back to source order if indices are missing.
+    private func firstPlayableChild(_ children: [PlexMetadata]) -> PlexMetadata? {
+        let sorted = children.sorted { ($0.index ?? Int.max) < ($1.index ?? Int.max) }
+        return sorted.first { ($0.index ?? 0) >= 1 } ?? sorted.first ?? children.first
     }
 
     /// Releases a transcode session so the server stops the ffmpeg process.
