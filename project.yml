@@ -8,15 +8,12 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.0"
+    DEVELOPMENT_TEAM: 62HCT6Q83X
+    MARKETING_VERSION: 0.1.0 # x-release-please-version
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
     # Localize: extract user-facing strings into Localizable.xcstrings at build.
     SWIFT_EMIT_LOC_STRINGS: "YES"
-    # Ad-hoc sign ("-") so the app gets an application-identifier entitlement
-    # (required for Keychain). Works on the Simulator without a dev team.
-    CODE_SIGN_IDENTITY: "-"
-    CODE_SIGN_STYLE: Manual
 targets:
   Cineslate:
     type: application
@@ -27,6 +24,9 @@ targets:
       path: Cineslate/Info.plist
       properties:
         CFBundleDisplayName: Cineslate
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        ITSAppUsesNonExemptEncryption: false
         UIUserInterfaceStyle: Dark
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
