@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/sunpebble/cineslate/compare/v0.2.0...v0.2.1) (2026-07-06)
+
+
+### Bug Fixes
+
+* **ios:** 补 iPad 四方向，解 ITMS-90474 退回 ([ae5d401](https://github.com/sunpebble/cineslate/commit/ae5d40145b16838e8adfb7d3f50ace14e5113a7e))
+
 ## [0.2.0](https://github.com/sunpebble/cineslate/compare/v0.1.0...v0.2.0) (2026-07-06)
 
 
