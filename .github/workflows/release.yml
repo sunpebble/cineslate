@@ -18,100 +18,12 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@v5
 
-  # Runs only when a release PR is merged (release created).
-  # Chained here because releases created with GITHUB_TOKEN don't trigger `on: release` workflows.
   testflight:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
-    runs-on: macos-26
-    env:
-      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-    steps:
-      - uses: actions/checkout@v7
-
-      # ASC requires builds with the iOS 26 SDK; the runner's default Xcode is older
-      - name: Select Xcode 26
-        run: |
-          ls -d /Applications/Xcode*.app
-          sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
-          xcodebuild -version
-
-      - name: Install xcodegen
-        run: |
-          for tap in $(brew tap); do
-            case "$tap" in homebrew/*) ;; *) brew trust "$tap" ;; esac
-          done
-          brew install xcodegen
-
-      # Imports into a temporary keychain and deletes it in a post-run step
-      - name: Import distribution certificate
-        uses: apple-actions/import-codesign-certs@v7
-        with:
-          p12-file-base64: ${{ secrets.DIST_CERT_P12 }}
-          p12-password: ${{ secrets.DIST_CERT_PASSWORD }}
-
-      # xcodebuild needs the key on disk for -allowProvisioningUpdates
-      - name: Write App Store Connect API key
-        env:
-          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
-        run: |
-          mkdir -p private_keys
-          printf '%s\n' "$ASC_API_KEY_P8" > "private_keys/AuthKey_${ASC_KEY_ID}.p8"
-          chmod 600 "private_keys/AuthKey_${ASC_KEY_ID}.p8"
-
-      - name: Generate Xcode project
-        run: xcodegen generate
-
-      - name: Archive
-        run: |
-          xcodebuild archive \
-            -project Cineslate.xcodeproj \
-            -scheme Cineslate \
-            -destination 'generic/platform=iOS' \
-            -archivePath build/Cineslate.xcarchive \
-            CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$PWD/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
-
-      - name: Export IPA
-        run: |
-          cat > ExportOptions.plist <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key><string>app-store-connect</string>
-            <key>destination</key><string>export</string>
-            <key>teamID</key><string>${APPLE_TEAM_ID}</string>
-          </dict>
-          </plist>
-          EOF
-          xcodebuild -exportArchive \
-            -archivePath build/Cineslate.xcarchive \
-            -exportOptionsPlist ExportOptions.plist \
-            -exportPath build \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$PWD/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
-
-      - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight-build@v5
-        with:
-          app-path: build/Cineslate.ipa
-          issuer-id: ${{ secrets.ASC_ISSUER_ID }}
-          api-key-id: ${{ secrets.ASC_KEY_ID }}
-          api-private-key: ${{ secrets.ASC_API_KEY_P8 }}
-          # The action signs one short-lived JWT up front; its processing-poll loop
-          # outlives the token and dies with a 401 even though the upload succeeded.
-          wait-for-processing: 'false'
-
-      - name: Clean up credentials
-        if: always()
-        run: rm -rf private_keys ExportOptions.plist
+    uses: sunpebble/ci/.github/workflows/ios-testflight.yml@v1
+    with:
+      xcode_project: Cineslate.xcodeproj
+      scheme: Cineslate
+      ipa_basename: Cineslate
+    secrets: inherit
