@@ -1,7 +1,9 @@
 import SwiftUI
+import UIKit
 
 struct DiscoverView: View {
     @EnvironmentObject private var router: Router
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @StateObject private var model = DiscoverViewModel()
     @State private var heroID: Int?
 
@@ -55,24 +57,40 @@ struct DiscoverView: View {
     // MARK: Hero carousel
 
     private var heroCarousel: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 14) {
+        // ponytail: size cells from the screen width so the carousel height can
+        // track the card's 361:520 ratio exactly — frame(height: cardH) matches
+        // the HStack, leaving no top-pinned void under the hero on either device
+        // (the old fixed 520pt frame was taller than the cards, stranding ~38pt
+        // on iPhone and ~160pt on iPad beneath them). iPad keeps the design's
+        // 361pt card (fills 520pt, 2 posters + peek); iPhone uses 86% for a
+        // centered card + peek. Symmetric inset = exact center.
+        let isPad = sizeClass == .regular
+        let screenW = UIScreen.main.bounds.width
+        let cellW = isPad ? 361.0 : screenW * 0.86
+        let cardH = cellW * 520.0 / 361.0
+        let spacing: CGFloat = isPad ? 18 : 12
+        let inset = isPad ? screenW * 0.04 : (screenW - cellW) / 2
+        return ScrollView(.horizontal) {
+            HStack(spacing: spacing) {
                 ForEach(model.heroes) { hero in
                     HeroCard(media: hero) { router.open(hero.ref) }
+                        .frame(width: cellW)
                 }
                 if model.heroes.isEmpty {
-                    ForEach(0..<2, id: \.self) { _ in
-                        LoadingBlock(height: 520, cornerRadius: 26).frame(width: 361)
+                    ForEach(0..<(isPad ? 4 : 2), id: \.self) { _ in
+                        LoadingBlock(height: cardH, cornerRadius: 26)
+                            .frame(width: cellW)
                     }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 12)
+            .padding(.horizontal, inset)
             .scrollTargetLayout()
         }
+        .frame(height: cardH)
         .scrollTargetBehavior(.viewAligned)
         .scrollPosition(id: $heroID)
         .rfxScroll()
+        .padding(.bottom, 12)
     }
 
     private var currentHeroIndex: Int {

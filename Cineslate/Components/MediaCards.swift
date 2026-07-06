@@ -1,59 +1,66 @@
 import SwiftUI
 
-/// Full-width hero card with backdrop, gradient scrim and a "查看项目" button.
+/// Hero card sized by its cell: the carousel hands each cell a fraction of the
+/// screen, so this card fills whatever width it gets and keeps the design's
+/// 361:520 portrait ratio — one big card + peek on iPhone, 2–3 across on iPad.
 struct HeroCard: View {
     let media: TMDBMedia
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            ZStack(alignment: .bottom) {
-                RemoteImage(path: media.backdropPath ?? media.posterPath, size: .w780, seed: media.displayTitle)
-                    .frame(width: 361, height: 520)
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = w * 520.0 / 361.0
+            Button(action: onTap) {
+                ZStack(alignment: .bottom) {
+                    RemoteImage(path: media.backdropPath ?? media.posterPath, size: .w780, seed: media.displayTitle)
+                        .frame(width: w, height: h)
 
-                LinearGradient(
-                    stops: [
-                        .init(color: .black.opacity(0.15), location: 0),
-                        .init(color: .clear, location: 0.35),
-                        .init(color: .black.opacity(0.62), location: 1),
-                    ],
-                    startPoint: .top, endPoint: .bottom
-                )
+                    LinearGradient(
+                        stops: [
+                            .init(color: .black.opacity(0.15), location: 0),
+                            .init(color: .clear, location: 0.35),
+                            .init(color: .black.opacity(0.62), location: 1),
+                        ],
+                        startPoint: .top, endPoint: .bottom
+                    )
 
-                VStack(spacing: 0) {
-                    Text(media.displayTitle)
-                        .font(.system(size: 40, weight: .black))
-                        .kerning(1)
-                        .foregroundStyle(RFX.accentBright)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.6)
-                        .shadow(color: .black.opacity(0.55), radius: 14, y: 2)
-                        .padding(.bottom, 14)
+                    VStack(spacing: 0) {
+                        Text(media.displayTitle)
+                            .font(.system(size: 40, weight: .black))
+                            .kerning(1)
+                            .foregroundStyle(RFX.accentBright)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.5)
+                            .shadow(color: .black.opacity(0.55), radius: 14, y: 2)
+                            .padding(.bottom, 14)
 
-                    Text(metaLine)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color(hex: 0xe8e8ea))
-                        .shadow(color: .black.opacity(0.7), radius: 8, y: 1)
-                        .padding(.bottom, 16)
+                        Text(metaLine)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color(hex: 0xe8e8ea))
+                            .shadow(color: .black.opacity(0.7), radius: 8, y: 1)
+                            .padding(.bottom, 16)
 
-                    HStack(spacing: 10) {
-                        Image(systemName: "play.fill").font(.system(size: 13))
-                        Text(String(localized: "查看项目")).font(.system(size: 17, weight: .bold))
+                        HStack(spacing: 10) {
+                            Image(systemName: "play.fill").font(.system(size: 13))
+                            Text(String(localized: "查看项目")).font(.system(size: 17, weight: .bold))
+                        }
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(.white, in: Capsule())
+                        .shadow(color: .black.opacity(0.35), radius: 20, y: 6)
                     }
-                    .foregroundStyle(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 15)
-                    .background(.white, in: Capsule())
-                    .shadow(color: .black.opacity(0.35), radius: 20, y: 6)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 30)
                 }
-                .padding(.horizontal, 28)
-                .padding(.bottom, 30)
+                .frame(width: w, height: h)
+                .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
             }
-            .frame(width: 361, height: 520)
-            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .aspectRatio(361.0 / 520.0, contentMode: .fit)
     }
 
     private var metaLine: String {
