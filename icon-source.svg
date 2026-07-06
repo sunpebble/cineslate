@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF6E8"/>
+      <stop offset="1" stop-color="#FBE3C6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.5">
+      <stop offset="0" stop-color="#F7B733" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#F7B733" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pebble" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#33373F"/>
+      <stop offset="1" stop-color="#232733"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 奶油底 -->
+  <rect width="1024" height="1024" fill="url(#cream)"/>
+
+  <!-- 日光晕 -->
+  <circle cx="512" cy="430" r="430" fill="url(#glow)"/>
+
+  <!-- 日轮 -->
+  <circle cx="512" cy="410" r="288" fill="#F7B733"/>
+
+  <!-- 卵石（圆润几何，压住日轮底部） -->
+  <rect x="250" y="470" width="524" height="392" rx="184" ry="184" fill="url(#pebble)"/>
+
+  <!-- 卵石顶光（克制高光） -->
+  <path d="M 355 545 Q 512 478 669 545" fill="none" stroke="#4A4F58" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- 播放三角（奶油色，视觉负形 / 播放键） -->
+  <polygon points="468,576 468,756 624,666" fill="#FFF6E8"/>
+</svg>

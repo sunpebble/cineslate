@@ -6,13 +6,13 @@ xcuserdata/
 .DS_Store
 
 # sourcekit-lsp <-> Xcode bridge; machine-local (absolute DerivedData paths).
-# Each dev regenerates it via `xcode-build-server config -project Reflix.xcodeproj -scheme Reflix`.
+# Each dev regenerates it via `xcode-build-server config -project Cineslate.xcodeproj -scheme Cineslate`.
 buildServer.json
 
 # The project is generated from project.yml via `xcodegen generate`,
 # but it is committed so the repo opens directly in Xcode.
-Reflix.xcodeproj/project.xcworkspace/xcuserdata/
-Reflix.xcodeproj/xcuserdata/
+Cineslate.xcodeproj/project.xcworkspace/xcuserdata/
+Cineslate.xcodeproj/xcuserdata/
 
 # Swift Package Manager
 .swiftpm/
