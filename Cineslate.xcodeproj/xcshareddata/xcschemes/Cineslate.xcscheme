@@ -35,6 +35,20 @@
                ReferencedContainer = "container:Cineslate.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B5E3B7A53EA51AA8EB4137F2"
+               BuildableName = "CineslateUITests.xctest"
+               BlueprintName = "CineslateUITests"
+               ReferencedContainer = "container:Cineslate.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -61,6 +75,17 @@
                BlueprintIdentifier = "36D59DB7080A7E00E79C244D"
                BuildableName = "CineslateTests.xctest"
                BlueprintName = "CineslateTests"
+               ReferencedContainer = "container:Cineslate.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B5E3B7A53EA51AA8EB4137F2"
+               BuildableName = "CineslateUITests.xctest"
+               BlueprintName = "CineslateUITests"
                ReferencedContainer = "container:Cineslate.xcodeproj">
             </BuildableReference>
          </TestableReference>

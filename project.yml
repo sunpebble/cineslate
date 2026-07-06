@@ -58,14 +58,27 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: "YES"
         PRODUCT_BUNDLE_IDENTIFIER: com.sunpebble.cineslateTests
+  CineslateUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: CineslateUITests
+    dependencies:
+      - target: Cineslate
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: "YES"
+        PRODUCT_BUNDLE_IDENTIFIER: com.sunpebble.cineslateUITests
 schemes:
   Cineslate:
     build:
       targets:
         Cineslate: all
         CineslateTests: [test]
+        CineslateUITests: [test]
     test:
       targets:
         - CineslateTests
+        - CineslateUITests
     run:
       config: Debug
