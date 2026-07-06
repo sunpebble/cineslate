@@ -8,32 +8,23 @@ final class ScreenshotTests: XCTestCase {
         let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let url = dir.appendingPathComponent(name)
         try? shot.pngRepresentation.write(to: url)
-        let att = XCTAttachment(screenshot: shot)
-        att.name = name
-        att.lifetime = .keepAlways
-        add(att)
+        let att = XCTAttachment(screenshot: shot); att.name = name; att.lifetime = .keepAlways; add(att)
     }
 
     func testCaptureScreenshots() throws {
         let app = XCUIApplication()
+        app.launchArguments += ["-AppleLanguages", "(en-US)", "-AppleLocale", "en_US"]
         app.launch()
-        // Wait for TMDB content (trending/hero) on first launch.
         sleep(16)
 
         let screen = XCUIScreen.main
+        save(screen.screenshot(), "cineslate-en-1-discover.png"); sleep(1)
 
-        // 1. Discover (hero + trending grid).
-        save(screen.screenshot(), "cineslate-1-discover.png")
-        sleep(1)
-
-        // 2. Open a media detail from the grid.
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.58)).tap()
         sleep(7)
-        save(screen.screenshot(), "cineslate-2-detail.png")
+        save(screen.screenshot(), "cineslate-en-2-detail.png")
 
-        // 3. Scroll the detail to reveal cast / similar.
-        app.swipeUp()
-        sleep(3)
-        save(screen.screenshot(), "cineslate-3-detail-more.png")
+        app.swipeUp(); sleep(3)
+        save(screen.screenshot(), "cineslate-en-3-detail-more.png")
     }
 }
