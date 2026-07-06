@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/sunpebble/cineslate/compare/v0.2.1...v0.2.2) (2026-07-06)
+
+
+### Bug Fixes
+
+* **ios:** hero 海报自适应 iPad 多海报并消除两端空洞 ([59d3a0f](https://github.com/sunpebble/cineslate/commit/59d3a0fdd0220e35ae78008689eb8f2a0129ff8e))
+
 ## [0.2.1](https://github.com/sunpebble/cineslate/compare/v0.2.0...v0.2.1) (2026-07-06)
 
 
