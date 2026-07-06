@@ -31,6 +31,12 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        # iPad multitasking (ITMS-90474) requires all four orientations on iPad.
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         # Keep audio playing when the screen locks / the app backgrounds.
         UIBackgroundModes:
           - audio
