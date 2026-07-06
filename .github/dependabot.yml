@@ -1,0 +1,13 @@
+# Dependabot 每周检查 GitHub Actions；合并为单个 PR。commit 前缀 chore。
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+    groups:
+      github-actions:
+        patterns:
+          - "*"

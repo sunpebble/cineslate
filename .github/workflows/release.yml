@@ -21,7 +21,7 @@ jobs:
   testflight:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
-    uses: sunpebble/ci/.github/workflows/ios-testflight.yml@v1
+    uses: sunpebble/ci/.github/workflows/ios-testflight.yml@v2
     with:
       xcode_project: Cineslate.xcodeproj
       scheme: Cineslate
