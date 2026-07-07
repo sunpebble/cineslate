@@ -17,6 +17,7 @@
 		224384F3B9294359F6933898 /* ImageStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C054AA88D532188A0DC2934A /* ImageStoreTests.swift */; };
 		24FFA56D08EDCEF5CC1C4C09 /* DiscoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7801CB26EA6A951BF5C1548 /* DiscoverViewModel.swift */; };
 		2739B339A6C46A3E99DD14F5 /* MediaCodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0AAC845B8883887D05A17B /* MediaCodingTests.swift */; };
+		8B2D4F19A3E5C607D1F82B64 /* TMDBImageLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7C1E88D2F4B90A5C6E1D42 /* TMDBImageLanguageTests.swift */; };
 		2F739B1DB55BA4C7BCA48BDB /* SubtitleParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A45E085359D4F482D3D74C /* SubtitleParser.swift */; };
 		328AECCF92B46A02C3BB8A79 /* OpenSubtitlesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DD313F53F6B660F8506FE9 /* OpenSubtitlesService.swift */; };
 		34D81A906041E4FC121D2835 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29DF2B5F2A2DF72A72387311 /* DetailView.swift */; };
@@ -86,6 +87,7 @@
 		54492A67889EC162851BC728 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		688951980BF2C1C53900852C /* PlexAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlexAuth.swift; sourceTree = "<group>"; };
 		6F0AAC845B8883887D05A17B /* MediaCodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCodingTests.swift; sourceTree = "<group>"; };
+		3A7C1E88D2F4B90A5C6E1D42 /* TMDBImageLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBImageLanguageTests.swift; sourceTree = "<group>"; };
 		70A257FD61F59EDA8528847F /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
 		7B1579D242324296BE31EFBF /* DiscoverArtworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverArtworkTests.swift; sourceTree = "<group>"; };
 		84ED4DA53E242A2AD56C454D /* TMDBModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBModels.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				AF1CE37C71FF36E197002530 /* DiskCacheTests.swift */,
 				C054AA88D532188A0DC2934A /* ImageStoreTests.swift */,
 				6F0AAC845B8883887D05A17B /* MediaCodingTests.swift */,
+				3A7C1E88D2F4B90A5C6E1D42 /* TMDBImageLanguageTests.swift */,
 			);
 			path = CineslateTests;
 			sourceTree = "<group>";
@@ -464,6 +467,7 @@
 				21A3D4A59A71F7579D76265B /* DiskCacheTests.swift in Sources */,
 				224384F3B9294359F6933898 /* ImageStoreTests.swift in Sources */,
 				2739B339A6C46A3E99DD14F5 /* MediaCodingTests.swift in Sources */,
+				8B2D4F19A3E5C607D1F82B64 /* TMDBImageLanguageTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

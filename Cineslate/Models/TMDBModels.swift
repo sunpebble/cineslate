@@ -197,14 +197,16 @@ struct TMDBDetail: Codable, Identifiable {
         return textless?.filePath ?? posterPath ?? backdropPath
     }
 
-    /// Best title-art logo path (transparent PNG), preferring Chinese, then
-    /// English, then language-neutral; ties broken by TMDB vote. Nil when none —
-    /// the caller then falls back to the plain text title.
-    var titleLogoPath: String? {
+    /// Best title-art logo path (transparent PNG), preferring the UI language,
+    /// then English, then language-neutral; ties broken by TMDB vote. Nil when
+    /// none — the caller then falls back to the plain text title.
+    var titleLogoPath: String? { titleLogoPath(preferring: TMDBService.imageLanguage) }
+
+    func titleLogoPath(preferring preferred: String) -> String? {
         guard let logos = images?.logos, !logos.isEmpty else { return nil }
         func rank(_ iso: String?) -> Int {
             switch iso {
-            case "zh": return 0
+            case preferred?: return 0
             case "en": return 1
             case nil, "": return 2
             default: return 3
