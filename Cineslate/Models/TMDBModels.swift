@@ -204,14 +204,15 @@ struct TMDBDetail: Codable, Identifiable {
 
     func titleLogoPath(preferring preferred: String) -> String? {
         guard let logos = images?.logos, !logos.isEmpty else { return nil }
+        // Language tiers, best first: the UI language, then English. De-duplicated
+        // so an English UI ranks "en" once (as the top tier) instead of leaving a
+        // dead English tier beneath it. Language-neutral art then ranks above any
+        // remaining foreign-language art.
+        let tiers = preferred == "en" ? ["en"] : [preferred, "en"]
         func rank(_ iso: String?) -> Int {
-            switch iso {
-            case preferred?: return 0
-            // Shadowed when preferred == "en"; the live fallback for zh users.
-            case "en": return 1
-            case nil, "": return 2
-            default: return 3
-            }
+            let lang = (iso?.isEmpty ?? true) ? nil : iso
+            if let lang, let tier = tiers.firstIndex(of: lang) { return tier }
+            return lang == nil ? tiers.count : tiers.count + 1
         }
         return logos.min { a, b in
             let (ra, rb) = (rank(a.iso6391), rank(b.iso6391))

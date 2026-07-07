@@ -50,6 +50,13 @@ final class TMDBImageLanguageTests: XCTestCase {
         XCTAssertEqual(detail.titleLogoPath(preferring: "en"), "/en.png")
     }
 
+    /// English UI with no English art must still prefer language-neutral art over
+    /// any other foreign language — guards the collapsed single-tier English path.
+    func testEnglishPreferenceFallsBackToNeutralOverForeign() {
+        let noEn = mixedLogos.filter { ($0["iso_639_1"] as? String) != "en" }
+        XCTAssertEqual(makeDetail(logos: noEn).titleLogoPath(preferring: "en"), "/neutral.png")
+    }
+
     func testFallsBackToEnglishThenNeutralWhenPreferredMissing() {
         let noZh = mixedLogos.filter { ($0["iso_639_1"] as? String) != "zh" }
         XCTAssertEqual(makeDetail(logos: noZh).titleLogoPath(preferring: "zh"), "/en.png")
