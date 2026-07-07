@@ -207,6 +207,7 @@ struct TMDBDetail: Codable, Identifiable {
         func rank(_ iso: String?) -> Int {
             switch iso {
             case preferred?: return 0
+            // Shadowed when preferred == "en"; the live fallback for zh users.
             case "en": return 1
             case nil, "": return 2
             default: return 3
