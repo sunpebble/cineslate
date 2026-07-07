@@ -34,6 +34,24 @@ final class TMDBService {
         (Locale.preferredLanguages.first ?? "en").hasPrefix("zh") ? "zh-CN" : "en-US"
     }
 
+    /// Preferred *image* language: TMDB tags artwork with bare ISO-639-1 codes
+    /// ("zh"), not the BCP-47 content language ("zh-CN").
+    static var imageLanguage: String { imageLanguage(for: contentLanguage) }
+
+    static func imageLanguage(for contentLanguage: String) -> String {
+        contentLanguage.hasPrefix("zh") ? "zh" : "en"
+    }
+
+    /// `include_image_language` value for the detail endpoint: the preferred
+    /// language plus English and language-neutral fallbacks, so localized
+    /// posters/logos are available but art-poor titles still render.
+    static var includeImageLanguages: String { includeImageLanguages(for: contentLanguage) }
+
+    static func includeImageLanguages(for contentLanguage: String) -> String {
+        let primary = imageLanguage(for: contentLanguage)
+        return primary == "en" ? "en,null" : "\(primary),en,null"
+    }
+
     private func get<T: Decodable>(_ path: String,
                                    query: [URLQueryItem] = [],
                                    language: String? = TMDBService.contentLanguage) async throws -> T {
@@ -107,7 +125,7 @@ final class TMDBService {
     func detail(_ ref: MediaRef) async throws -> TMDBDetail {
         let q = [
             URLQueryItem(name: "append_to_response", value: "credits,similar,images,external_ids"),
-            URLQueryItem(name: "include_image_language", value: "en,null,zh"),
+            URLQueryItem(name: "include_image_language", value: TMDBService.includeImageLanguages),
         ]
         return try await get("/\(ref.type.rawValue)/\(ref.id)", query: q)
     }

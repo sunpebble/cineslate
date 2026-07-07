@@ -197,18 +197,22 @@ struct TMDBDetail: Codable, Identifiable {
         return textless?.filePath ?? posterPath ?? backdropPath
     }
 
-    /// Best title-art logo path (transparent PNG), preferring Chinese, then
-    /// English, then language-neutral; ties broken by TMDB vote. Nil when none —
-    /// the caller then falls back to the plain text title.
-    var titleLogoPath: String? {
+    /// Best title-art logo path (transparent PNG), preferring the UI language,
+    /// then English, then language-neutral; ties broken by TMDB vote. Nil when
+    /// none — the caller then falls back to the plain text title.
+    var titleLogoPath: String? { titleLogoPath(preferring: TMDBService.imageLanguage) }
+
+    func titleLogoPath(preferring preferred: String) -> String? {
         guard let logos = images?.logos, !logos.isEmpty else { return nil }
+        // Language tiers, best first: the UI language, then English. De-duplicated
+        // so an English UI ranks "en" once (as the top tier) instead of leaving a
+        // dead English tier beneath it. Language-neutral art then ranks above any
+        // remaining foreign-language art.
+        let tiers = preferred == "en" ? ["en"] : [preferred, "en"]
         func rank(_ iso: String?) -> Int {
-            switch iso {
-            case "zh": return 0
-            case "en": return 1
-            case nil, "": return 2
-            default: return 3
-            }
+            let lang = (iso?.isEmpty ?? true) ? nil : iso
+            if let lang, let tier = tiers.firstIndex(of: lang) { return tier }
+            return lang == nil ? tiers.count : tiers.count + 1
         }
         return logos.min { a, b in
             let (ra, rb) = (rank(a.iso6391), rank(b.iso6391))

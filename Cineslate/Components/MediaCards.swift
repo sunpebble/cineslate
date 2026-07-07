@@ -13,7 +13,12 @@ struct HeroCard: View {
             let h = w * 520.0 / 361.0
             Button(action: onTap) {
                 ZStack(alignment: .bottom) {
-                    RemoteImage(path: media.backdropPath ?? media.posterPath, size: .w780, seed: media.displayTitle)
+                    // Portrait poster at .original: the card is 2:3-ish portrait, so a
+                    // w780 *backdrop* (landscape, 439px tall) would be cropped to a
+                    // sliver and upscaled ~3.5× — visibly blurry. The poster matches
+                    // the card's aspect almost exactly and .original keeps it sharp
+                    // at 3× on the full-width hero.
+                    RemoteImage(path: media.posterPath ?? media.backdropPath, size: .original, seed: media.displayTitle)
                         .frame(width: w, height: h)
 
                     LinearGradient(

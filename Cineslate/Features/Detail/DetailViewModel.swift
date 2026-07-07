@@ -67,9 +67,9 @@ final class DetailViewModel: ObservableObject {
         )
     }
 
-    // v2: detail payload now carries images.posters / images.logos — bumping the
-    // key forces a one-time refetch so pre-existing caches don't hide them.
-    static func cacheKey(_ ref: MediaRef) -> String { "detail-v2-\(ref.type.rawValue)-\(ref.id)-\(TMDBService.contentLanguage)" }
+    // v3: images are fetched with a language-aware include_image_language, so
+    // v2 snapshots (fixed "en,null,zh") must not be served from cache.
+    static func cacheKey(_ ref: MediaRef) -> String { "detail-v3-\(ref.type.rawValue)-\(ref.id)-\(TMDBService.contentLanguage)" }
 }
 
 /// Concrete `DetailLike` used when saving a detail page to the library.
