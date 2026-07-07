@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.3](https://github.com/sunpebble/cineslate/compare/v0.2.2...v0.2.3) (2026-07-07)
+
+
+### Bug Fixes
+
+* **discover:** render hero cards from portrait posters at original size ([1980f79](https://github.com/sunpebble/cineslate/commit/1980f79d361b41d59a0776c07f90822bf03689ae))
+* migrate iOS 26-deprecated UIScreen.main and UIWindow() usages ([23bd323](https://github.com/sunpebble/cineslate/commit/23bd3230d3384be414333c91f72c690b77ec00c3))
+* sharp hero posters on Discover + language-aware TMDB artwork ([83516fe](https://github.com/sunpebble/cineslate/commit/83516fec07534bee0dc6e60a155e43558221deac))
+* **tmdb:** fetch and rank all artwork by the UI language ([853380a](https://github.com/sunpebble/cineslate/commit/853380a22448ae9a680a68e51d7db98410e37ea5))
+
 ## [0.2.2](https://github.com/sunpebble/cineslate/compare/v0.2.1...v0.2.2) (2026-07-06)
 
 
