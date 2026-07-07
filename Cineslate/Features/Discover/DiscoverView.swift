@@ -65,7 +65,9 @@ struct DiscoverView: View {
         // 361pt card (fills 520pt, 2 posters + peek); iPhone uses 86% for a
         // centered card + peek. Symmetric inset = exact center.
         let isPad = sizeClass == .regular
-        let screenW = UIScreen.main.bounds.width
+        let screenW = UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+            .first?.bounds.width ?? 393
         let cellW = isPad ? 361.0 : screenW * 0.86
         let cardH = cellW * 520.0 / 361.0
         let spacing: CGFloat = isPad ? 18 : 12

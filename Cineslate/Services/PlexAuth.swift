@@ -148,9 +148,9 @@ final class PlexAuth: NSObject, ASWebAuthenticationPresentationContextProviding 
     // MARK: ASWebAuthenticationPresentationContextProviding
 
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap { $0.windows }
-            .first { $0.isKeyWindow } ?? ASPresentationAnchor()
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        // ponytail: auth is always presented from a live scene, so scenes is never empty here.
+        return scenes.flatMap { $0.windows }.first { $0.isKeyWindow }
+            ?? UIWindow(windowScene: scenes.first!)
     }
 }
