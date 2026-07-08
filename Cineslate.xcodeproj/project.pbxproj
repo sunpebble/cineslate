@@ -40,7 +40,6 @@
 		9271B07216BDCAA4042889B4 /* TMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70A257FD61F59EDA8528847F /* TMDBService.swift */; };
 		98842DCF7F71FFBEC30F1CD0 /* PlexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EE73404A06C9E7CA87DF531 /* PlexModels.swift */; };
 		99C44CF4E01A6237C9BCC038 /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A4C0C4E367BA1AB5DA1DC20 /* LibraryStore.swift */; };
-		A496E742ECA225C2CB387640 /* hook.cache.json in Resources */ = {isa = PBXBuildFile; fileRef = B145AFE547292665D9AFCA3A /* hook.cache.json */; };
 		A6CDAEAAC074DAE5B86B706D /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A2505E273BC2F16C0CF6EA3 /* CachedAsyncImage.swift */; };
 		A960D87305B14E99EEDEAD8D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 9DFDDA7C537FBF189F49C6AF /* Localizable.xcstrings */; };
 		B5166E7C38DD5AA3D6A94D36 /* BrowseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5C66D3A157E34CF4E5309A /* BrowseView.swift */; };
@@ -101,7 +100,6 @@
 		ACA842881E73BED9DAC23B5D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		AE2158EEAA39A09BC386CABB /* MineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineView.swift; sourceTree = "<group>"; };
 		AF1CE37C71FF36E197002530 /* DiskCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskCacheTests.swift; sourceTree = "<group>"; };
-		B145AFE547292665D9AFCA3A /* hook.cache.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = hook.cache.json; sourceTree = "<group>"; };
 		B6A45E085359D4F482D3D74C /* SubtitleParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleParser.swift; sourceTree = "<group>"; };
 		B759D13A631FE721F768C641 /* MineViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineViewModel.swift; sourceTree = "<group>"; };
 		B7DD313F53F6B660F8506FE9 /* OpenSubtitlesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSubtitlesService.swift; sourceTree = "<group>"; };
@@ -224,7 +222,6 @@
 			isa = PBXGroup;
 			children = (
 				CFD6C8C106E681F94C4084A0 /* Info.plist */,
-				681A2F747C0560995429E17F /* .impeccable */,
 				7489986D9AE3EF64AF906822 /* App */,
 				73FA0AF27E7925D2400116B7 /* Components */,
 				311CDDC6FD51F5148EF94C6D /* Config */,
@@ -235,14 +232,6 @@
 				18F8F83EC2D11F132039F469 /* Services */,
 			);
 			path = Cineslate;
-			sourceTree = "<group>";
-		};
-		681A2F747C0560995429E17F /* .impeccable */ = {
-			isa = PBXGroup;
-			children = (
-				B145AFE547292665D9AFCA3A /* hook.cache.json */,
-			);
-			path = .impeccable;
 			sourceTree = "<group>";
 		};
 		686702A06485D7C12F17334E /* Discover */ = {
@@ -443,7 +432,6 @@
 			files = (
 				B9275B54B7886C204721C83E /* Assets.xcassets in Resources */,
 				A960D87305B14E99EEDEAD8D /* Localizable.xcstrings in Resources */,
-				A496E742ECA225C2CB387640 /* hook.cache.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
