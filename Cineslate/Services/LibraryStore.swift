@@ -74,7 +74,6 @@ struct LibraryItem: Codable, Identifiable, Hashable {
 /// Local-only observable library repository. The full library is persisted to
 /// `DiskCache` and rendered instantly on launch; writes update the UI immediately.
 ///
-/// `ponytail:` previously PostgREST-backed with optimistic UI + rollback; the
 /// Supabase layer was removed to align with sunpebble's "private by design —
 /// no account" promise. Upgrade path: if sync ever returns, re-introduce a
 /// remote store behind this interface.

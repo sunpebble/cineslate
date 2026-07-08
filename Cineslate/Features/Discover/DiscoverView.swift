@@ -57,7 +57,6 @@ struct DiscoverView: View {
     // MARK: Hero carousel
 
     private var heroCarousel: some View {
-        // ponytail: size cells from the screen width so the carousel height can
         // track the card's 361:520 ratio exactly — frame(height: cardH) matches
         // the HStack, leaving no top-pinned void under the hero on either device
         // (the old fixed 520pt frame was taller than the cards, stranding ~38pt
